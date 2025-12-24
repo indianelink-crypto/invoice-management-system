@@ -67,3 +67,4 @@ loadSupabase()
     .then(initSupabase)
     .catch(() => console.error("❌ Supabase load failed"));
 
+
