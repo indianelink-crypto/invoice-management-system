@@ -1,4 +1,4 @@
-// Mobile Invoice Manager — FULLY UPGRADED + ALL FIXES
+// Mobile Invoice Manager — FULLY UPGRADED + ALL LATEST FIXES
 
 class MobileInvoiceManager {
     constructor() {
@@ -17,7 +17,7 @@ class MobileInvoiceManager {
     }
 
     init() {
-        // NEW: Set date as DD-MM-YYYY
+        // Set date as DD-MM-YYYY
         const today = new Date();
         const dd = String(today.getDate()).padStart(2, '0');
         const mm = String(today.getMonth() + 1).padStart(2, '0');
@@ -25,9 +25,8 @@ class MobileInvoiceManager {
         const formattedDate = `${dd}-${mm}-${yyyy}`;
         const dateInput = document.getElementById('mobileInvoiceDate');
         if (dateInput) {
-            dateInput.value = formattedDate;
-            dateInput.type = 'text'; // Hide calendar picker, show text
-            dateInput.readOnly = true;
+            dateInput.textContent = formattedDate; // For span display
+            dateInput.value = formattedDate; // Fallback if input
         }
 
         this.updateInvoiceNumber();
@@ -89,21 +88,24 @@ class MobileInvoiceManager {
                 if (e.key === 'Enter' && this.selectedCustomer) {
                     e.preventDefault();
 
-                    document.getElementById('mobileCustomerName').value = this.selectedCustomer.name || '';
-                    document.getElementById('mobileMobileNumber').value = this.selectedCustomer.mobile;
-                    document.getElementById('mobileStreetName').value = this.selectedCustomer.street || '';
+                    // Fill clean display card
+                    document.getElementById('displayCustomerName').textContent = this.selectedCustomer.name || 'Unknown';
+                    document.getElementById('displayMobile').textContent = this.selectedCustomer.mobile;
+                    document.getElementById('displayStreet').textContent = this.selectedCustomer.street || 'Not set';
 
+                    // Show invoice section
                     invoiceSection.style.display = 'block';
+                    
+                    // Clear top search & preview
                     searchInput.value = '';
                     preview.style.display = 'none';
-                    searchInput.blur(); // Hide keyboard
+                    searchInput.blur();
 
-                    // DIRECT FOCUS TO FIRST ITEM DROPDOWN
+                    // Focus first item dropdown
                     setTimeout(() => {
                         const firstSelect = document.querySelector('#mobileItemsTableBody .mobile-item-desc-select');
                         if (firstSelect) {
                             firstSelect.focus();
-                            firstSelect.size = firstSelect.options.length > 10 ? 10 : firstSelect.options.length; // Optional: expand dropdown
                         }
                     }, 200);
                 }
@@ -213,7 +215,8 @@ class MobileInvoiceManager {
         const dd = String(today.getDate()).padStart(2, '0');
         const mm = String(today.getMonth() + 1).padStart(2, '0');
         const yyyy = today.getFullYear();
-        document.getElementById('mobileInvoiceDate').value = `${dd}-${mm}-${yyyy}`;
+        const dateSpan = document.getElementById('mobileInvoiceDate');
+        if (dateSpan) dateSpan.textContent = `${dd}-${mm}-${yyyy}`;
 
         this.updateInvoiceNumber();
         document.getElementById('mobileItemsTableBody').innerHTML = '';
@@ -225,6 +228,11 @@ class MobileInvoiceManager {
         document.getElementById('customerInvoiceSection').style.display = 'none';
         document.getElementById('mobileSearchInput').value = '';
         document.getElementById('selectedCustomerPreview').style.display = 'none';
+
+        // Clear display card
+        document.getElementById('displayCustomerName').textContent = '';
+        document.getElementById('displayMobile').textContent = '';
+        document.getElementById('displayStreet').textContent = '';
     }
 
     fillPrintTemplate(invoice) {
@@ -297,11 +305,11 @@ class MobileInvoiceManager {
         const total = this.calculateGrandTotal();
 
         const invoice = {
-            invoiceNumber: document.getElementById('mobileInvoiceNumber').value,
+            invoiceNumber: document.getElementById('mobileInvoiceNumber').textContent || document.getElementById('mobileInvoiceNumber').value,
             customerName: this.selectedCustomer.name,
             mobileNumber: this.selectedCustomer.mobile,
             streetName: this.selectedCustomer.street || '',
-            invoiceDate: document.getElementById('mobileInvoiceDate').value,
+            invoiceDate: document.getElementById('mobileInvoiceDate').textContent,
             items,
             total,
             status: 'unpaid'
@@ -341,7 +349,7 @@ class MobileInvoiceManager {
 
             this.updateCustomersList();
             this.updateMobileNumbersList();
-            this.updateStreetNamesList(); // Refresh street too
+            this.updateStreetNamesList();
         } catch (err) {
             alert("Failed to add customer");
         }
@@ -596,13 +604,7 @@ class MobileInvoiceManager {
         window.sb
             .channel('mobile:items')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'items' }, payload => {
-                this.loadItemsFromDB().then(() => {
-                    // Re-add rows if needed
-                    if (document.getElementById('customerInvoiceSection').style.display === 'block') {
-                        document.getElementById('mobileItemsTableBody').innerHTML = '';
-                        this.addItemRow();
-                    }
-                });
+                this.loadItemsFromDB();
             })
             .subscribe();
     }
@@ -628,7 +630,10 @@ class MobileInvoiceManager {
     }
 
     updateInvoiceNumber() {
-        document.getElementById('mobileInvoiceNumber').value = this.generateInvoiceNumber();
+        const numberSpan = document.getElementById('mobileInvoiceNumber');
+        if (numberSpan) {
+            numberSpan.textContent = this.generateInvoiceNumber();
+        }
     }
 
     loadInvoices() {
@@ -643,7 +648,7 @@ class MobileInvoiceManager {
         return JSON.parse(localStorage.getItem('customers')) || [];
     }
 
-    // FIXED: Force refresh datalists with dynamic options
+    // FIXED: Dynamic datalists for perfect dropdown
     updateMobileNumbersList() {
         const datalist = document.getElementById('mobileMobileNumbersList');
         if (datalist) {
