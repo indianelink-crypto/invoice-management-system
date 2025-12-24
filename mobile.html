@@ -35,11 +35,11 @@
                 <!-- SINGLE SEARCH BAR SECTION - Will hide after selection -->
                 <div id="searchSection" class="form-group">
                     <label for="mobileSearchInput">🔍 Search Customer by Mobile Number</label>
-                    <input type="tel" id="mobileSearchInput" list="mobileMobileNumbersList" required placeholder="Type 10-digit mobile number" autocomplete="off">
+                    <input type="tel" id="mobileSearchInput" list="mobileMobileNumbersList" required placeholder="Type 10-digit mobile number" autocomplete="off" style="font-size: 1.3em; padding: 20px; border-radius: 18px; border: 2px solid #2c3e50;">
                     <datalist id="mobileMobileNumbersList"></datalist>
 
                     <!-- Preview Card - NOW CLICKABLE TO SELECT -->
-                    <div id="selectedCustomerPreview" class="customer-preview" style="display: none;">
+                    <div id="selectedCustomerPreview" class="customer-preview" style="display: none; margin-top: 20px; padding: 25px; background: linear-gradient(135deg, #2c3e50, #34495e); color: white; border-radius: 20px; text-align: center; font-size: 1.2em; box-shadow: 0 10px 25px rgba(0,0,0,0.2); cursor: pointer;" onclick="window.mobileInvoiceManager.selectCustomerFromPreview()">
                         <strong style="font-size: 1.4em; color: #ffd700;">Tap to Select Customer</strong><br><br>
                         <strong>Name:</strong> <span id="previewName" style="font-weight: bold; color: #ffd700;"></span><br>
                         <strong>Mobile:</strong> <span id="previewMobile" style="font-weight: bold; color: #ffd700;"></span><br>
@@ -48,69 +48,69 @@
                     </div>
                 </div>
 
-                <!-- PREMIUM CLEAN INVOICE SECTION (NEW MODERN DESIGN) -->
-                <div id="customerInvoiceSection" style="display: none;">
+                <!-- PREMIUM CLEAN INVOICE SECTION -->
+                <div id="customerInvoiceSection" style="display: none; margin-top: 30px; padding: 0 20px;">
 
-                    <!-- Glassmorphic Selected Customer Card -->
-                    <div class="glass customer-card">
-                        <div class="customer-header">
-                            <span class="badge">Selected Customer</span>
-                            <h3 class="customer-name" id="displayCustomerName"></h3>
-                        </div>
-                        
-                        <div class="customer-details">
-                            <div class="detail-row">
-                                <span class="label">Mobile</span>
-                                <span class="value" id="displayMobile"></span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="label">Street</span>
-                                <span class="value" id="displayStreet"></span>
-                            </div>
+                    <!-- NEW: Centered Premium Customer Card (theme-matched + center aligned) -->
+                    <div class="glass customer-card" style="text-align: center; margin: 20px auto; max-width: 90%; padding: 28px 20px; background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.12); border-radius: 24px; box-shadow: 0 10px 35px rgba(0,0,0,0.25);">
+                        <h3 style="margin: 0 0 20px 0; font-size: 1.6em; font-weight: 700; color: #ffd700; letter-spacing: 0.5px;">
+                            Selected Customer
+                        </h3>
+                        <div style="font-size: 1.25em; line-height: 1.8; color: white;">
+                            <strong style="color: rgba(255,255,255,0.9); font-weight: 600;">Name:</strong> 
+                            <span id="displayCustomerName" style="font-weight: bold; color: #ffd700;"></span><br>
+                            
+                            <strong style="color: rgba(255,255,255,0.9); font-weight: 600;">Mobile:</strong> 
+                            <span id="displayMobile" style="font-weight: bold; color: #ffd700;"></span><br>
+                            
+                            <strong style="color: rgba(255,255,255,0.9); font-weight: 600;">Street:</strong> 
+                            <span id="displayStreet" style="color: #ffd700;"></span>
                         </div>
                     </div>
 
-                    <!-- Invoice Info Bar (Date & Number) -->
-                    <div class="invoice-info-bar glass">
-                        <div class="info-item">
-                            <span class="label-small">Date</span>
-                            <span class="value" id="mobileInvoiceDate"></span>
+                    <!-- Date & Invoice Number Premium Center -->
+                    <div style="text-align: center; margin-bottom: 40px;">
+                        <div style="margin-bottom: 25px;">
+                            <label style="font-size: 1.3em; color: #2c3e50; font-weight: bold;">Invoice Date</label><br>
+                            <span id="mobileInvoiceDate" style="font-size: 2em; font-weight: bold; color: #2c3e50; background: #f8f9fa; padding: 15px 40px; border-radius: 20px; display: inline-block; box-shadow: 0 8px 20px rgba(0,0,0,0.1);"></span>
                         </div>
-                        <div class="info-item invoice-no">
-                            <span class="label-small">Invoice No</span>
-                            <span class="value highlight" id="mobileInvoiceNumber"></span>
+                        <div>
+                            <label style="font-size: 1.3em; color: #2c3e50; font-weight: bold;">Invoice Number</label><br>
+                            <span id="mobileInvoiceNumber" style="font-size: 2.2em; font-weight: bold; color: white; background: linear-gradient(135deg, #2c3e50, #34495e); padding: 18px 45px; border-radius: 24px; display: inline-block; box-shadow: 0 10px 30px rgba(0,0,0,0.2);"></span>
                         </div>
                     </div>
 
-                    <!-- Premium Items Section -->
-                    <div class="items-section">
-                        <h3 class="section-title">Invoice Items</h3>
-                        
-                        <div id="mobileItemsContainer" class="items-container">
-                            <!-- Dynamic item rows will be added here by JS -->
+                    <!-- Premium Items Card -->
+                    <div style="background: white; border-radius: 24px; padding: 25px; box-shadow: 0 12px 35px rgba(0,0,0,0.15); margin-bottom: 30px;">
+                        <h3 style="text-align: center; margin-bottom: 30px; color: #2c3e50; font-size: 1.7em;">Invoice Items</h3>
+                        <table class="mobile-items-table" style="width: 100%; border-collapse: separate; border-spacing: 0 12px;">
+                            <thead>
+                                <tr style="background: linear-gradient(135deg, #2c3e50, #34495e); color: white; border-radius: 16px;">
+                                    <th style="padding: 18px; text-align: left; border-radius: 16px 0 0 16px;">Description</th>
+                                    <th style="padding: 18px;">Qty</th>
+                                    <th style="padding: 18px;">Price (₹)</th>
+                                    <th style="padding: 18px;">Total</th>
+                                    <th style="border-radius: 0 16px 16px 0;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="mobileItemsTableBody" style="background: #f8f9fa;"></tbody>
+                        </table>
+                        <button type="button" id="mobileAddItemBtn" class="mobile-add-item-btn" style="margin-top: 25px; width: 100%; padding: 20px; font-size: 1.4em; background: #2c3e50; border-radius: 20px;">+ Add Item</button>
+                    </div>
+
+                    <!-- Grand Total Premium Highlight -->
+                    <div style="text-align: center; margin: 50px 0;">
+                        <div class="grand-total" style="font-size: 2.2em;">
+                            <strong style="color: #2c3e50;">Grand Total:</strong>
+                            <span id="mobileGrandTotal" style="color: #e74c3c; font-weight: bold; font-size: 1.2em;">₹0</span>
                         </div>
-
-                        <button type="button" id="mobileAddItemBtn" class="add-item-btn">
-                            + Add Item
-                        </button>
                     </div>
 
-                    <!-- Grand Total Premium Card -->
-                    <div class="grand-total-card glass">
-                        <span class="total-label">Grand Total</span>
-                        <span id="mobileGrandTotal" class="grand-total-value">₹0.00</span>
+                    <!-- Premium Buttons -->
+                    <div style="text-align: center;">
+                        <button type="submit" class="mobile-btn mobile-btn-primary" style="font-size: 1.6em; padding: 22px 60px; border-radius: 30px; background: linear-gradient(135deg, #27ae60, #2ecc71); box-shadow: 0 10px 25px rgba(39,174,96,0.3);">Generate Invoice</button>
+                        <button type="button" id="mobilePrintBtn" class="mobile-btn mobile-btn-secondary" style="display:none; font-size: 1.6em; padding: 22px 60px; margin-top: 25px; border-radius: 30px;">Print Invoice</button>
                     </div>
-
-                    <!-- Action Buttons -->
-                    <div class="bottom-action">
-                        <button type="submit" class="generate-btn">
-                            Generate Invoice
-                        </button>
-                        <button type="button" id="mobilePrintBtn" class="generate-btn" style="display:none; margin-top: 16px;">
-                            Print Invoice
-                        </button>
-                    </div>
-
                 </div>
             </form>
         </div>

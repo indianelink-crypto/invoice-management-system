@@ -811,4 +811,33 @@ body::before {
     box-shadow: 0 15px 35px rgba(0,0,0,0.3);
     background: linear-gradient(135deg, #34495e, #2c3e50);
 }
+.customer-card {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 24px;
+    box-shadow: 0 10px 35px rgba(0,0,0,0.25);
+    padding: 28px 20px;
+    margin: 20px auto;
+    max-width: 90%;
+    text-align: center;
+}
 
+.customer-card h3 {
+    font-weight: 700;
+    font-size: 1.6em;
+    color: #ffd700;
+    margin-bottom: 20px;
+    letter-spacing: -0.5px;
+}
+
+.customer-card strong {
+    color: rgba(255,255,255,0.9);
+    font-weight: 600;
+}
+
+.customer-card span {
+    color: #ffd700;
+    font-weight: 700;
+}
