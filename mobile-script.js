@@ -1,4 +1,4 @@
-// Mobile Invoice Manager — MAJOR UPGRADE: Single Search → Customer Select → Invoice Form
+// Mobile Invoice Manager — FULLY UPGRADED + ALL FIXES
 
 class MobileInvoiceManager {
     constructor() {
@@ -11,13 +11,25 @@ class MobileInvoiceManager {
         this.mobileSearchQuery = '';
         this.dateFilterValue = '';
         this.lastInvoice = null;
-        this.selectedCustomer = null; // NEW: Track selected customer
+        this.selectedCustomer = null;
 
         this.init();
     }
 
     init() {
-        document.getElementById('mobileInvoiceDate').valueAsDate = new Date();
+        // NEW: Set date as DD-MM-YYYY
+        const today = new Date();
+        const dd = String(today.getDate()).padStart(2, '0');
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const yyyy = today.getFullYear();
+        const formattedDate = `${dd}-${mm}-${yyyy}`;
+        const dateInput = document.getElementById('mobileInvoiceDate');
+        if (dateInput) {
+            dateInput.value = formattedDate;
+            dateInput.type = 'text'; // Hide calendar picker, show text
+            dateInput.readOnly = true;
+        }
+
         this.updateInvoiceNumber();
         this.updateStreetNamesList();
         this.updateCustomersList();
@@ -44,7 +56,7 @@ class MobileInvoiceManager {
             console.log("✅ Mobile: Initial data loaded + Real-time active");
         });
 
-        // ==================== NEW: Customer Search & Selection Logic ====================
+        // ==================== CUSTOMER SEARCH & SELECTION ====================
         const searchInput = document.getElementById('mobileSearchInput');
         const preview = document.getElementById('selectedCustomerPreview');
         const previewName = document.getElementById('previewName');
@@ -55,7 +67,7 @@ class MobileInvoiceManager {
         if (searchInput) {
             searchInput.addEventListener('input', () => {
                 const mobile = searchInput.value.trim();
-                if (mobile.length >= 10) {
+                if (mobile.length === 10) {
                     const found = this.customers.find(c => c.mobile === mobile);
                     if (found) {
                         this.selectedCustomer = found;
@@ -76,37 +88,34 @@ class MobileInvoiceManager {
             searchInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' && this.selectedCustomer) {
                     e.preventDefault();
-                    // Load customer into form
+
                     document.getElementById('mobileCustomerName').value = this.selectedCustomer.name || '';
                     document.getElementById('mobileMobileNumber').value = this.selectedCustomer.mobile;
                     document.getElementById('mobileStreetName').value = this.selectedCustomer.street || '';
 
-                    // Show full invoice section
                     invoiceSection.style.display = 'block';
-                    searchInput.blur(); // Hide keyboard
-
-                    // Clear search & preview
                     searchInput.value = '';
                     preview.style.display = 'none';
+                    searchInput.blur(); // Hide keyboard
 
-                    // Focus on first item dropdown
+                    // DIRECT FOCUS TO FIRST ITEM DROPDOWN
                     setTimeout(() => {
-                        const firstSelect = document.querySelector('.mobile-item-desc-select');
-                        if (firstSelect) firstSelect.focus();
-                    }, 100);
+                        const firstSelect = document.querySelector('#mobileItemsTableBody .mobile-item-desc-select');
+                        if (firstSelect) {
+                            firstSelect.focus();
+                            firstSelect.size = firstSelect.options.length > 10 ? 10 : firstSelect.options.length; // Optional: expand dropdown
+                        }
+                    }, 200);
                 }
             });
         }
 
-        // Initial empty item row when section opens
         this.addItemRow();
 
-        // Live grand total
         document.getElementById('mobileItemsTableBody').addEventListener('input', () => {
             this.calculateGrandTotal();
         });
 
-        // Print button
         document.getElementById('mobilePrintBtn').addEventListener('click', () => {
             if (this.lastInvoice) {
                 this.fillPrintTemplate(this.lastInvoice);
@@ -147,8 +156,6 @@ class MobileInvoiceManager {
             });
         }
     }
-
-    // === Rest of methods unchanged (addItemRow, calculateGrandTotal, etc) ===
 
     addItemRow() {
         const tbody = document.getElementById('mobileItemsTableBody');
@@ -200,7 +207,14 @@ class MobileInvoiceManager {
 
     clearInvoiceForm() {
         document.getElementById('mobileInvoiceForm').reset();
-        document.getElementById('mobileInvoiceDate').valueAsDate = new Date();
+
+        // Reset date to today DD-MM-YYYY
+        const today = new Date();
+        const dd = String(today.getDate()).padStart(2, '0');
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const yyyy = today.getFullYear();
+        document.getElementById('mobileInvoiceDate').value = `${dd}-${mm}-${yyyy}`;
+
         this.updateInvoiceNumber();
         document.getElementById('mobileItemsTableBody').innerHTML = '';
         this.addItemRow();
@@ -308,10 +322,6 @@ class MobileInvoiceManager {
         }
     }
 
-    // === All other methods remain exactly the same as your original code ===
-    // (handleCustomerSubmit, markAsPaid, printInvoiceFromList, renderMobileInvoices, etc.)
-    // I'm keeping them unchanged below for completeness
-
     async handleCustomerSubmit(e) {
         e.preventDefault();
 
@@ -331,12 +341,7 @@ class MobileInvoiceManager {
 
             this.updateCustomersList();
             this.updateMobileNumbersList();
-
-            const mobileInput = document.getElementById('mobileMobileNumber');
-            if (mobileInput && mobileInput.value.trim() === mobile) {
-                mobileInput.dispatchEvent(new Event('change'));
-            }
-
+            this.updateStreetNamesList(); // Refresh street too
         } catch (err) {
             alert("Failed to add customer");
         }
@@ -448,7 +453,6 @@ class MobileInvoiceManager {
         }
     }
 
-    // Supabase methods unchanged
     async loadAllDataFromSupabase() {
         try {
             await Promise.all([
@@ -592,7 +596,13 @@ class MobileInvoiceManager {
         window.sb
             .channel('mobile:items')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'items' }, payload => {
-                this.loadItemsFromDB();
+                this.loadItemsFromDB().then(() => {
+                    // Re-add rows if needed
+                    if (document.getElementById('customerInvoiceSection').style.display === 'block') {
+                        document.getElementById('mobileItemsTableBody').innerHTML = '';
+                        this.addItemRow();
+                    }
+                });
             })
             .subscribe();
     }
@@ -633,28 +643,45 @@ class MobileInvoiceManager {
         return JSON.parse(localStorage.getItem('customers')) || [];
     }
 
-    updateStreetNamesList() {
-        const datalist = document.getElementById('mobileStreetNamesList');
+    // FIXED: Force refresh datalists with dynamic options
+    updateMobileNumbersList() {
+        const datalist = document.getElementById('mobileMobileNumbersList');
         if (datalist) {
-            datalist.innerHTML = this.streetNames.map(s => `<option value="${s}">`).join('');
+            datalist.innerHTML = '';
+            this.customers.forEach(c => {
+                const option = document.createElement('option');
+                option.value = c.mobile;
+                datalist.appendChild(option);
+            });
         }
-        const newDatalist = document.getElementById('newStreetNamesList');
-        if (newDatalist) {
-            newDatalist.innerHTML = this.streetNames.map(s => `<option value="${s}">`).join('');
-        }
+    }
+
+    updateStreetNamesList() {
+        const lists = [
+            document.getElementById('mobileStreetNamesList'),
+            document.getElementById('newStreetNamesList')
+        ];
+        lists.forEach(datalist => {
+            if (datalist) {
+                datalist.innerHTML = '';
+                this.streetNames.forEach(s => {
+                    const option = document.createElement('option');
+                    option.value = s;
+                    datalist.appendChild(option);
+                });
+            }
+        });
     }
 
     updateCustomersList() {
         const datalist = document.getElementById('mobileCustomersList');
         if (datalist) {
-            datalist.innerHTML = this.customers.map(c => `<option value="${c.name}">`).join('');
-        }
-    }
-
-    updateMobileNumbersList() {
-        const datalist = document.getElementById('mobileMobileNumbersList');
-        if (datalist) {
-            datalist.innerHTML = this.customers.map(c => `<option value="${c.mobile}">`).join('');
+            datalist.innerHTML = '';
+            this.customers.forEach(c => {
+                const option = document.createElement('option');
+                option.value = c.name;
+                datalist.appendChild(option);
+            });
         }
     }
 }

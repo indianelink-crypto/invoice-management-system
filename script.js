@@ -1,8 +1,7 @@
-console.log("✅ script.js loaded - Street Name Dropdown Only + Grand Total Live + Print Invoice Fixed");
+console.log("✅ script.js loaded - Street Name Dropdown Only + Grand Total Live + Print Invoice Fixed + DD-MM-YYYY Date");
 
 class InvoiceManagementSystem {
     constructor() {
-        // KEEP ORIGINAL localStorage load (temporary fallback)
         this.customers = JSON.parse(localStorage.getItem("customers")) || [];
         this.users = JSON.parse(localStorage.getItem("users")) || [];
         this.invoices = JSON.parse(localStorage.getItem("invoices")) || [];
@@ -24,33 +23,28 @@ class InvoiceManagementSystem {
         this.renderInvoices();
         this.populateDatalists();
         this.populateItemDatalist();
-        this.initInvoiceDefaults();
+        this.initInvoiceDefaults(); // This now sets DD-MM-YYYY
         this.setupFilters();
 
-        // Migrate old streets to new array & render dropdown
         this.migrateStreets();
         this.renderStreetsDropdown();
 
-        // NEW: Hide print button initially
         const printBtn = document.getElementById('printInvoiceBtn');
         if (printBtn) printBtn.style.display = 'none';
 
-        // NEW: Print button click (for new invoice)
         if (printBtn) {
             printBtn.addEventListener('click', () => {
                 window.print();
             });
         }
 
-        // === FIXED: Load data from Supabase PROPERLY with .then() ===
         this.loadAllDataFromSupabase().then(() => {
-            // After fresh data loaded → start real-time listening
             this.setupRealtimeSubscriptions();
             console.log("✅ Initial data loaded + Real-time subscriptions active");
         });
     }
 
-    // ====================== NEW SUPABASE METHODS ======================
+    // ====================== SUPABASE METHODS ======================
 
     async loadAllDataFromSupabase() {
         try {
@@ -61,9 +55,8 @@ class InvoiceManagementSystem {
                 this.loadInvoicesFromDB()
             ]);
 
-            // After loading from DB, refresh everything
             this.renderCustomers();
-            this.renderUsers(); // users still local (or migrate later)
+            this.renderUsers();
             this.renderItems();
             this.renderInvoices();
             this.populateDatalists();
@@ -75,7 +68,6 @@ class InvoiceManagementSystem {
             console.log("✅ All data loaded from Supabase");
         } catch (err) {
             console.error("Supabase load failed, using localStorage fallback", err);
-            // Keep local data if DB fails
         }
     }
 
@@ -107,7 +99,6 @@ class InvoiceManagementSystem {
             .order('created_at', { ascending: false });
         if (error) throw error;
 
-        // Map to match old structure
         this.invoices = data.map(inv => ({
             invoiceNumber: inv.invoice_number,
             date: inv.invoice_date,
@@ -198,7 +189,7 @@ class InvoiceManagementSystem {
             .insert({ name })
             .select()
             .single();
-        if (error && error.code !== '23505') throw error; // ignore duplicate
+        if (error && error.code !== '23505') throw error;
         if (data && !this.streets.includes(data.name)) {
             this.streets.push(data.name);
             localStorage.setItem("streets", JSON.stringify(this.streets));
@@ -206,7 +197,6 @@ class InvoiceManagementSystem {
     }
 
     async saveInvoiceToDB(invoice) {
-        // First ensure customer exists
         let customer = this.customers.find(c => c.mobile === invoice.mobile);
         if (!customer) {
             customer = await this.saveCustomerToDB(invoice.customer, invoice.mobile, invoice.street);
@@ -235,7 +225,6 @@ class InvoiceManagementSystem {
             throw error;
         }
 
-        // Add to local array
         this.invoices.unshift(invoice);
         localStorage.setItem("invoices", JSON.stringify(this.invoices));
         return data;
@@ -243,7 +232,7 @@ class InvoiceManagementSystem {
 
     async togglePaidStatusInDB(invoiceIndex) {
         const inv = this.invoices[invoiceIndex];
-        if (!inv.id) return; // old local invoice
+        if (!inv.id) return;
 
         const newStatus = inv.status === 'paid' ? 'unpaid' : 'paid';
         const { error } = await window.sb
@@ -257,9 +246,7 @@ class InvoiceManagementSystem {
         }
     }
 
-    // === NEW: Real-time Subscriptions ===
     setupRealtimeSubscriptions() {
-        // Invoices real-time
         window.sb
             .channel('admin:invoices')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'invoices' }, payload => {
@@ -272,7 +259,6 @@ class InvoiceManagementSystem {
             })
             .subscribe();
 
-        // Customers real-time
         window.sb
             .channel('admin:customers')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'customers' }, payload => {
@@ -284,7 +270,6 @@ class InvoiceManagementSystem {
             })
             .subscribe();
 
-        // Streets real-time
         window.sb
             .channel('admin:streets')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'streets' }, payload => {
@@ -296,7 +281,6 @@ class InvoiceManagementSystem {
             })
             .subscribe();
 
-        // Items real-time
         window.sb
             .channel('admin:items')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'items' }, payload => {
@@ -308,16 +292,16 @@ class InvoiceManagementSystem {
             })
             .subscribe();
     }
-    // ====================== END OF NEW METHODS ======================
 
-    // Migrate existing streets from customers to streets array
+    // ====================== UI & LOGIC ======================
+
     migrateStreets() {
         this.customers.forEach(c => {
             if (c.street && !this.streets.includes(c.street)) {
                 this.streets.push(c.street);
             }
         });
-        this.streets = [...new Set(this.streets.sort())]; // unique & sorted
+        this.streets = [...new Set(this.streets.sort())];
         this.save();
     }
 
@@ -350,7 +334,6 @@ class InvoiceManagementSystem {
     }
 
     initMasterForms() {
-        // === FIXED: Add New Street Button with Better Error Handling ===
         document.getElementById('addNewStreetBtn').addEventListener('click', async () => {
             const newStreet = document.getElementById('newStreetName').value.trim();
             if (!newStreet) {
@@ -374,14 +357,13 @@ class InvoiceManagementSystem {
                     return;
                 }
 
-                // Success - add to local array if not already there
                 if (!this.streets.includes(data.name)) {
                     this.streets.push(data.name);
                     localStorage.setItem("streets", JSON.stringify(this.streets));
                 }
 
                 this.renderStreetsDropdown();
-                this.populateDatalists(); // update autocomplete too
+                this.populateDatalists();
                 document.getElementById('newStreetName').value = '';
                 alert("✅ New street added!");
 
@@ -391,7 +373,6 @@ class InvoiceManagementSystem {
             }
         });
 
-        // Customer Master - NOW USES DB
         document.getElementById("masterForm").addEventListener("submit", async e => {
             e.preventDefault();
             const name = document.getElementById("masterCustomerName").value.trim();
@@ -407,11 +388,9 @@ class InvoiceManagementSystem {
 
             try {
                 if (editIndex === "-1") {
-                    // Add new
                     await this.saveCustomerToDB(name, mobile, street);
                     alert("✅ Customer added");
                 } else {
-                    // Update
                     await this.updateCustomerInDB(customerId, name, mobile, street);
                     alert("✅ Customer updated");
                 }
@@ -427,7 +406,6 @@ class InvoiceManagementSystem {
             }
         });
 
-        // Items form - NOW USES DB
         const itemsForm = document.getElementById("itemsForm");
         if (itemsForm) {
             itemsForm.addEventListener("submit", async e => {
@@ -459,14 +437,8 @@ class InvoiceManagementSystem {
                 }
             });
         }
-
-        // User form remains local for now (can migrate later)
-        document.getElementById("userForm").addEventListener("submit", e => {
-            // ... unchanged (as before)
-        });
     }
 
-    // editCustomer, deleteCustomer - NOW USE DB
     async editCustomer(i) {
         const c = this.customers[i];
         document.getElementById("masterCustomerName").value = c.name;
@@ -491,7 +463,6 @@ class InvoiceManagementSystem {
         }
     }
 
-    // Similar for editItem / deleteItem
     async editItem(i) {
         const item = this.items[i];
         document.getElementById("itemName").value = item.name;
@@ -515,13 +486,11 @@ class InvoiceManagementSystem {
         }
     }
 
-    // Invoice form submit - NOW SAVES TO DB
     initInvoiceForm() {
         const mobileInput = document.getElementById('mobileNumber');
         const customerNameInput = document.getElementById('customerName');
         const streetInput = document.getElementById('streetName');
 
-        // === NEW: Auto fill name & street when mobile number entered (change or enter) ===
         if (mobileInput && customerNameInput && streetInput) {
             const autoFillCustomer = () => {
                 const mobile = mobileInput.value.trim();
@@ -530,7 +499,6 @@ class InvoiceManagementSystem {
                     customerNameInput.value = found.name;
                     streetInput.value = found.street || '';
                 } else {
-                    // If no match, clear fields (optional)
                     customerNameInput.value = '';
                     streetInput.value = '';
                 }
@@ -538,8 +506,6 @@ class InvoiceManagementSystem {
 
             mobileInput.addEventListener('change', autoFillCustomer);
             mobileInput.addEventListener('blur', autoFillCustomer);
-
-            // Support Enter key
             mobileInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
@@ -606,11 +572,10 @@ class InvoiceManagementSystem {
         });
     }
 
-    // togglePaid - NOW UPDATES DB
     async togglePaid(index) {
         const inv = this.invoices[index];
         inv.status = inv.status === 'paid' ? 'unpaid' : 'paid';
-        this.save(); // keep local sync
+        this.save();
         await this.togglePaidStatusInDB(index);
         this.renderInvoices();
         this.setupFilters();
@@ -655,8 +620,20 @@ class InvoiceManagementSystem {
         `).join("") || "<p>No items yet</p>";
     }
 
+    // NEW: DD-MM-YYYY Date Format
     initInvoiceDefaults() {
-        document.getElementById('invoiceDate').valueAsDate = new Date();
+        const dateInput = document.getElementById('invoiceDate');
+        if (dateInput) {
+            const today = new Date();
+            const dd = String(today.getDate()).padStart(2, '0');
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const yyyy = today.getFullYear();
+            const formatted = `${dd}-${mm}-${yyyy}`;
+            dateInput.value = formatted;
+            dateInput.type = 'text'; // Hide calendar picker
+            dateInput.readOnly = true;
+        }
+
         this.updateInvoiceNumber();
         this.addItem();
         this.calculateGrandTotal();
