@@ -1,4 +1,4 @@
-// Mobile Invoice Manager — FULLY UPGRADED + ALL LATEST FIXES (Top Search Hide)
+// Mobile Invoice Manager — FULLY UPGRADED + ALL LATEST FIXES (Top Search Hide + Preview Card Tap)
 
 class MobileInvoiceManager {
     constructor() {
@@ -61,7 +61,7 @@ class MobileInvoiceManager {
         const previewMobile = document.getElementById('previewMobile');
         const previewStreet = document.getElementById('previewStreet');
         const invoiceSection = document.getElementById('customerInvoiceSection');
-        const searchSection = document.getElementById('searchSection'); // Top search wrapper
+        const searchSection = document.getElementById('searchSection');
 
         if (searchInput) {
             searchInput.addEventListener('input', () => {
@@ -87,28 +87,7 @@ class MobileInvoiceManager {
             searchInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' && this.selectedCustomer) {
                     e.preventDefault();
-
-                    // Fill clean display card
-                    document.getElementById('displayCustomerName').textContent = this.selectedCustomer.name || 'Unknown';
-                    document.getElementById('displayMobile').textContent = this.selectedCustomer.mobile;
-                    document.getElementById('displayStreet').textContent = this.selectedCustomer.street || 'Not set';
-
-                    // Show invoice section
-                    invoiceSection.style.display = 'block';
-
-                    // HIDE TOP SEARCH SECTION COMPLETELY
-                    if (searchSection) {
-                        searchSection.style.display = 'none';
-                    }
-
-                    // Clear preview
-                    preview.style.display = 'none';
-
-                    // Focus first item dropdown
-                    setTimeout(() => {
-                        const firstSelect = document.querySelector('#mobileItemsTableBody .mobile-item-desc-select');
-                        if (firstSelect) firstSelect.focus();
-                    }, 200);
+                    this.selectCustomerFromPreview(); // Reuse same method
                 }
             });
         }
@@ -158,6 +137,34 @@ class MobileInvoiceManager {
                 this.renderMobileInvoices();
             });
         }
+    }
+
+    // NEW METHOD: Called from HTML onclick or Enter key
+    selectCustomerFromPreview() {
+        if (!this.selectedCustomer) return;
+
+        // Fill clean display card
+        document.getElementById('displayCustomerName').textContent = this.selectedCustomer.name || 'Unknown';
+        document.getElementById('displayMobile').textContent = this.selectedCustomer.mobile;
+        document.getElementById('displayStreet').textContent = this.selectedCustomer.street || 'Not set';
+
+        // Show invoice section
+        document.getElementById('customerInvoiceSection').style.display = 'block';
+
+        // HIDE TOP SEARCH SECTION COMPLETELY
+        const searchSection = document.getElementById('searchSection');
+        if (searchSection) {
+            searchSection.style.display = 'none';
+        }
+
+        // Hide preview
+        document.getElementById('selectedCustomerPreview').style.display = 'none';
+
+        // Focus first item dropdown
+        setTimeout(() => {
+            const firstSelect = document.querySelector('#mobileItemsTableBody .mobile-item-desc-select');
+            if (firstSelect) firstSelect.focus();
+        }, 200);
     }
 
     addItemRow() {
@@ -313,22 +320,22 @@ class MobileInvoiceManager {
         const total = this.calculateGrandTotal();
 
         // Get displayed date (DD-MM-YYYY)
-const displayedDate = document.getElementById('mobileInvoiceDate').textContent.trim(); // e.g., "24-12-2025"
+        const displayedDate = document.getElementById('mobileInvoiceDate').textContent.trim();
 
-// Convert to YYYY-MM-DD for Supabase
-const [dd, mm, yyyy] = displayedDate.split('-');
-const dbDate = `${yyyy}-${mm}-${dd}`; // "2025-12-24"
+        // Convert to YYYY-MM-DD for Supabase
+        const [dd, mm, yyyy] = displayedDate.split('-');
+        const dbDate = `${yyyy}-${mm}-${dd}`;
 
-const invoice = {
-    invoiceNumber: document.getElementById('mobileInvoiceNumber').textContent || document.getElementById('mobileInvoiceNumber').value,
-    customerName: this.selectedCustomer.name,
-    mobileNumber: this.selectedCustomer.mobile,
-    streetName: this.selectedCustomer.street || '',
-    invoiceDate: dbDate,  // <-- இப்போ correct format
-    items,
-    total,
-    status: 'unpaid'
-};
+        const invoice = {
+            invoiceNumber: document.getElementById('mobileInvoiceNumber').textContent || document.getElementById('mobileInvoiceNumber').value,
+            customerName: this.selectedCustomer.name,
+            mobileNumber: this.selectedCustomer.mobile,
+            streetName: this.selectedCustomer.street || '',
+            invoiceDate: dbDate,
+            items,
+            total,
+            status: 'unpaid'
+        };
 
         try {
             await this.saveInvoiceToDB(invoice);
