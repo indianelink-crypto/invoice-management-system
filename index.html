@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Management System</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="styles.css">
+
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📄 Invoice Management System</h1>
+            <div class="header-controls">
+                <p class="admin-badge">Admin Access - Full Control</p>
+                <div class="user-info">
+                    <span id="currentUser">Admin</span>
+                    <button id="logoutBtn" class="logout-btn">Logout</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <section class="left-section">
+                <div class="section-tabs">
+                    <button class="section-tab active" data-tab="invoice">Create Invoice</button>
+                    <button class="section-tab" data-tab="master">Master Entry</button>
+                </div>
+
+                <!-- Invoice Tab -->
+                <div id="invoiceTab" class="tab-content active">
+                    <h2>Create New Invoice</h2>
+                    <form id="invoiceForm" class="invoice-form">
+                        <div class="form-group">
+                            <label for="customerName">Customer Name</label>
+                            <div class="customer-input-wrapper">
+                                <input type="text" id="customerName" list="customersList" required placeholder="Search customer by name" autocomplete="off">
+                                <datalist id="customersList"></datalist>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="mobileNumber">Mobile Number</label>
+                            <div class="customer-input-wrapper">
+                                <input type="tel" id="mobileNumber" list="mobileNumbersList" required placeholder="Search customer by mobile number" autocomplete="off">
+                                <datalist id="mobileNumbersList"></datalist>
+                            </div>
+                        </div>
+
+                        <div id="invoiceDetailsSection" class="invoice-details-section">
+                            <div class="form-group">
+                                <label for="streetName">Street Name</label>
+                                <input type="text" id="streetName" list="streetNamesList" required placeholder="Select or enter street name" autocomplete="off">
+                                <datalist id="streetNamesList"></datalist>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="invoiceDate">Invoice Date</label>
+                                <input type="date" id="invoiceDate" readonly required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="invoiceNumber">Invoice Number</label>
+                                <input type="text" id="invoiceNumber" readonly placeholder="Auto-generated">
+                            </div>
+                            <div class="items-section">
+                                <h3>Invoice Items</h3>
+                                <div id="itemsContainer"></div>
+                                <button type="button" id="addItemBtn" class="add-item-btn">+ Add Item</button>
+
+                                <!-- NEW: Grand Total -->
+                                <div class="total-section">
+                                    <div class="grand-total">
+                                        <strong>Grand Total:</strong>
+                                        <span id="grandTotal">₹0.00</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Generate Invoice</button>
+                                <button type="button" id="printInvoiceBtn" class="btn btn-primary" style="display: none;">Print Invoice</button>
+                                <button type="reset" class="btn btn-secondary">Clear Form</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Master Tab -->
+                <div id="masterTab" class="tab-content">
+                    <div class="master-tabs">
+                        <button class="master-sub-tab active" data-subtab="customer">Customer</button>
+                        <button class="master-sub-tab" data-subtab="users">Users</button>
+                        <button class="master-sub-tab" data-subtab="items">Items</button>
+                    </div>
+
+                    <!-- Customer Master Entry -->
+                    <div id="customerSubTab" class="master-sub-content active">
+                        <h2>Customer Master Entry</h2>
+                        
+                        <!-- Add New Street Section -->
+                        <div class="add-street-section" style="margin-bottom: 20px; padding: 15px; background: #f0f8ff; border-radius: 12px;">
+                            <h3>Add New Street</h3>
+                            <div class="form-group">
+                                <label for="newStreetName">New Street Name</label>
+                                <input type="text" id="newStreetName" placeholder="Enter new street name">
+                            </div>
+                            <button type="button" id="addNewStreetBtn" class="btn btn-primary">Add Street</button>
+                        </div>
+
+                        <form id="masterForm" class="invoice-form">
+                            <input type="hidden" id="customerEditIndex" value="-1">
+                            <div class="form-group">
+                                <label for="masterCustomerName">Customer Name</label>
+                                <input type="text" id="masterCustomerName" required placeholder="Enter customer name">
+                            </div>
+                            <div class="form-group">
+                                <label for="masterMobileNumber">Mobile Number</label>
+                                <input type="tel" id="masterMobileNumber" required placeholder="Enter mobile number" pattern="[0-9]{10}">
+                            </div>
+                            <div class="form-group">
+                                <label for="masterStreetNameSelect">Street Name</label>
+                                <select id="masterStreetNameSelect" required>
+                                    <option value="">Select a street</option>
+                                    <!-- Options filled by JS -->
+                                </select>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary" id="customerSubmitBtn">Add Customer</button>
+                                <button type="reset" class="btn btn-secondary">Clear Form</button>
+                            </div>
+                        </form>
+
+                        <div class="master-list-section">
+                            <h3>Customer List</h3>
+                            <div id="customerList" class="customer-list"></div>
+                        </div>
+                    </div>
+
+                    <!-- User Master -->
+                    <div id="usersSubTab" class="master-sub-content">
+                        <h2>User Management</h2>
+                        <form id="userForm" class="invoice-form">
+                            <input type="hidden" id="userEditIndex" value="-1">
+                            <div class="form-group">
+                                <label for="userUsername">Username</label>
+                                <input type="text" id="userUsername" required placeholder="Enter username">
+                            </div>
+                            <div class="form-group">
+                                <label for="userPassword">Password</label>
+                                <input type="password" id="userPassword" required placeholder="Enter password">
+                            </div>
+                            <div class="form-group">
+                                <label for="userRole">Role</label>
+                                <select id="userRole" required>
+                                    <option value="admin">Admin</option>
+                                    <option value="employee">Employee</option>
+                                </select>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary" id="userSubmitBtn">Add User</button>
+                                <button type="reset" class="btn btn-secondary">Clear Form</button>
+                            </div>
+                        </form>
+
+                        <div class="master-list-section">
+                            <h3>User List</h3>
+                            <div id="userList" class="customer-list"></div>
+                        </div>
+                    </div>
+
+                    <!-- Items Master -->
+                    <div id="itemsSubTab" class="master-sub-content">
+                        <h2>Items Master Entry</h2>
+                        <form id="itemsForm" class="invoice-form">
+                            <input type="hidden" id="itemEditIndex" value="-1">
+                            <div class="form-group">
+                                <label for="itemName">Item Name</label>
+                                <input type="text" id="itemName" required placeholder="Enter item name e.g. Milk, Bread">
+                            </div>
+                            <div class="form-group">
+                                <label for="itemPrice">Price (₹)</label>
+                                <input type="number" id="itemPrice" min="0" step="0.01" required placeholder="Enter default price">
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary" id="itemSubmitBtn">Add Item</button>
+                                <button type="reset" class="btn btn-secondary">Clear</button>
+                            </div>
+                        </form>
+
+                        <div class="master-list-section">
+                            <h3>Items List</h3>
+                            <div id="itemsList" class="customer-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Invoice List -->
+            <section class="invoice-list-section">
+                <h2>Invoices</h2>
+                <div class="filter-tabs">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="unpaid">Unpaid</button>
+                    <button class="filter-btn" data-filter="paid">Paid</button>
+                </div>
+
+                <div class="street-filter">
+                    <label for="streetFilter">Filter by Street:</label>
+                    <select id="streetFilter">
+                        <option value="all">All Streets</option>
+                    </select>
+                </div>
+
+                <div id="invoiceList" class="invoice-list"></div>
+            </section>
+        </div>
+    </div>
+
+    <!-- NEW: Hidden Print Template -->
+    <div id="printArea" style="display: none;">
+        <div class="print-invoice">
+            <h2>INVOICE</h2>
+            <div class="print-header">
+                <p><strong>Invoice No:</strong> <span id="printInvoiceNo"></span></p>
+                <p><strong>Date:</strong> <span id="printDate"></span></p>
+            </div>
+            <div class="print-customer">
+                <p><strong>Customer:</strong> <span id="printCustomer"></span></p>
+                <p><strong>Mobile:</strong> <span id="printMobile"></span></p>
+                <p><strong>Street:</strong> <span id="printStreet"></span></p>
+            </div>
+            <table class="print-table">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Qty</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody id="printItems"></tbody>
+            </table>
+            <div class="print-footer">
+                <p><strong>Grand Total: ₹<span id="printGrandTotal"></span></strong></p>
+                <p><strong>Status:</strong> <span id="printStatus"></span></p>
+            </div>
+            <p class="print-thankyou">Thank you for your business!</p>
+        </div>
+    </div>
+
+    <script src="auth-utils.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

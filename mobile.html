@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="icon" href="data:,">
+    <title>Invoice App - Employee</title>
+    <link rel="stylesheet" href="mobile-styles.css">
+</head>
+<body>
+    <div class="mobile-container">
+        <header class="mobile-header">
+            <div class="mobile-header-content">
+                <div>
+                    <h1>📄 Invoice App</h1>
+                    <p class="employee-badge">Employee Access</p>
+                </div>
+                <button id="mobileLogoutBtn" class="mobile-logout-btn">Logout</button>
+            </div>
+        </header>
+
+        <div class="mobile-tabs">
+            <button class="mobile-tab active" data-tab="invoice">Create Invoice</button>
+            <button class="mobile-tab" data-tab="invoices">View Invoices</button>
+            <button class="mobile-tab" data-tab="customer">Add Customer</button>
+        </div>
+
+        <!-- Invoice Creation Form -->
+        <div id="invoiceTab" class="mobile-tab-content active">
+            <form id="mobileInvoiceForm" class="mobile-form">
+                <div class="form-group">
+                    <label for="mobileCustomerName">Customer Name</label>
+                    <input type="text" id="mobileCustomerName" list="mobileCustomersList" required placeholder="Search by name">
+                    <datalist id="mobileCustomersList"></datalist>
+                </div>
+
+                <div class="form-group">
+                    <label for="mobileMobileNumber">Mobile Number</label>
+                    <input type="tel" id="mobileMobileNumber" list="mobileMobileNumbersList" required placeholder="Search by mobile">
+                    <datalist id="mobileMobileNumbersList"></datalist>
+                </div>
+
+                <div class="form-group">
+                    <label for="mobileStreetName">Street Name</label>
+                    <input type="text" id="mobileStreetName" list="mobileStreetNamesList" required placeholder="Select street">
+                    <datalist id="mobileStreetNamesList"></datalist>
+                </div>
+
+                <div class="form-group">
+                    <label for="mobileInvoiceDate">Invoice Date</label>
+                    <input type="date" id="mobileInvoiceDate" required readonly>
+                </div>
+
+                <div class="form-group">
+                    <label for="mobileInvoiceNumber">Invoice Number</label>
+                    <input type="text" id="mobileInvoiceNumber" readonly>
+                </div>
+
+                <div class="mobile-items-section">
+                    <h3>Invoice Items</h3>
+                    <table class="mobile-items-table">
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th>Qty</th>
+                                <th>Price (₹)</th>
+                                <th>Total</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="mobileItemsTableBody"></tbody>
+                    </table>
+                    <button type="button" id="mobileAddItemBtn" class="mobile-add-item-btn">+ Add Item</button>
+                </div>
+
+                <div class="total-section">
+                    <div class="grand-total">
+                        <strong>Grand Total:</strong>
+                        <span id="mobileGrandTotal">₹0</span>
+                    </div>
+                </div>
+
+                <div class="mobile-form-actions">
+                    <button type="submit" class="mobile-btn mobile-btn-primary">Generate Invoice</button>
+                    <button type="button" id="mobilePrintBtn" class="mobile-btn mobile-btn-primary" style="display: none;">Print Invoice</button>
+                    <button type="reset" id="mobileClearBtn" class="mobile-btn mobile-btn-secondary">Clear Form</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- View Invoices Tab with Filters -->
+        <div id="invoicesTab" class="mobile-tab-content">
+            <div class="mobile-filters-icon">
+                <div class="filter-item">
+                    <label>📅 Date</label>
+                    <input type="date" id="mobileDateFilter" class="mobile-filter-input">
+                </div>
+                <div class="filter-item">
+                    <label>🏠 Street</label>
+                    <select id="mobileStreetFilter" class="mobile-filter-select">
+                        <option value="all">All Streets</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label>💳 Status</label>
+                    <select id="mobileStatusFilter" class="mobile-filter-select">
+                        <option value="all">All</option>
+                        <option value="paid">Paid</option>
+                        <option value="unpaid">Unpaid</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label>📱 Mobile</label>
+                    <input type="tel" id="mobileInvoiceSearch" placeholder="Search mobile" class="mobile-filter-input">
+                </div>
+            </div>
+            <div id="mobileInvoiceList" class="mobile-invoice-list"></div>
+        </div>
+
+        <!-- Add Customer Tab - FIXED: Proper id & content -->
+        <div id="customerTab" class="mobile-tab-content">
+            <form id="mobileCustomerForm" class="mobile-form">
+                <div class="form-group">
+                    <label for="newCustomerName">Customer Name</label>
+                    <input type="text" id="newCustomerName" required placeholder="Enter name">
+                </div>
+                <div class="form-group">
+                    <label for="newMobileNumber">Mobile Number</label>
+                    <input type="tel" id="newMobileNumber" required pattern="[0-9]{10}" placeholder="10 digit mobile">
+                </div>
+                <div class="form-group">
+                    <label for="newStreetName">Street Name</label>
+                    <input type="text" id="newStreetName" list="newStreetNamesList" required placeholder="Select or type street">
+                    <datalist id="newStreetNamesList"></datalist>
+                </div>
+                <div class="mobile-form-actions">
+                    <button type="submit" class="mobile-btn mobile-btn-primary">Add Customer</button>
+                    <button type="reset" class="mobile-btn mobile-btn-secondary">Clear</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="mobile-footer">
+            <p>Employee Access - Full Invoice Creation</p>
+        </div>
+    </div>
+
+    <!-- Hidden Print Template -->
+    <div id="mobilePrintArea" style="display: none;">
+        <div class="print-invoice">
+            <h2>INVOICE</h2>
+            <div class="print-header">
+                <p><strong>Invoice No:</strong> <span id="mobilePrintInvoiceNo"></span></p>
+                <p><strong>Date:</strong> <span id="mobilePrintDate"></span></p>
+            </div>
+            <div class="print-customer">
+                <p><strong>Customer:</strong> <span id="mobilePrintCustomer"></span></p>
+                <p><strong>Mobile:</strong> <span id="mobilePrintMobile"></span></p>
+                <p><strong>Street:</strong> <span id="mobilePrintStreet"></span></p>
+            </div>
+            <table class="print-table">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Qty</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody id="mobilePrintItems"></tbody>
+            </table>
+            <div class="print-footer">
+                <p><strong>Grand Total: ₹<span id="mobilePrintGrandTotal"></span></strong></p>
+            </div>
+            <p class="print-thankyou">Thank you for your business!</p>
+        </div>
+    </div>
+
+    <script src="auth-utils.js"></script>
+    <script src="mobile-script.js"></script>
+</body>
+</html>

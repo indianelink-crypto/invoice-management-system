@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="icon" href="data:,">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Login - Invoice App</title>
+    <link rel="stylesheet" href="mobile-login-styles.css">
+</head>
+<body>
+    <div class="mobile-login-container">
+        <div class="mobile-login-box">
+            <div class="mobile-login-header">
+                <h1>📄 Invoice App</h1>
+                <p class="mobile-login-subtitle">Employee Login</p>
+            </div>
+            <form id="mobileLoginForm" class="mobile-login-form">
+                <div class="form-group">
+                    <label for="mobileUsername">Email</label>
+                    <input type="email" id="mobileUsername" required>
+                 
+                </div>
+                <div class="form-group">
+                    <label for="mobilePassword">Password</label>
+                    <input type="password" id="mobilePassword" required placeholder="Enter password" autocomplete="current-password">
+                </div>
+                <div id="mobileLoginError" class="mobile-error-message" style="display: none;"></div>
+                <button type="submit" class="mobile-login-btn">Login</button>
+            </form>
+        </div>
+    </div>
+<script src="auth-utils.js"></script>
+   <script src="mobile-login-script.js"></script>
+</body>
+</html>
+
+
