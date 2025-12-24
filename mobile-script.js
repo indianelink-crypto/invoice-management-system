@@ -312,16 +312,23 @@ class MobileInvoiceManager {
 
         const total = this.calculateGrandTotal();
 
-        const invoice = {
-            invoiceNumber: document.getElementById('mobileInvoiceNumber').textContent || document.getElementById('mobileInvoiceNumber').value,
-            customerName: this.selectedCustomer.name,
-            mobileNumber: this.selectedCustomer.mobile,
-            streetName: this.selectedCustomer.street || '',
-            invoiceDate: document.getElementById('mobileInvoiceDate').textContent,
-            items,
-            total,
-            status: 'unpaid'
-        };
+        // Get displayed date (DD-MM-YYYY)
+const displayedDate = document.getElementById('mobileInvoiceDate').textContent.trim(); // e.g., "24-12-2025"
+
+// Convert to YYYY-MM-DD for Supabase
+const [dd, mm, yyyy] = displayedDate.split('-');
+const dbDate = `${yyyy}-${mm}-${dd}`; // "2025-12-24"
+
+const invoice = {
+    invoiceNumber: document.getElementById('mobileInvoiceNumber').textContent || document.getElementById('mobileInvoiceNumber').value,
+    customerName: this.selectedCustomer.name,
+    mobileNumber: this.selectedCustomer.mobile,
+    streetName: this.selectedCustomer.street || '',
+    invoiceDate: dbDate,  // <-- இப்போ correct format
+    items,
+    total,
+    status: 'unpaid'
+};
 
         try {
             await this.saveInvoiceToDB(invoice);
