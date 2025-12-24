@@ -54,7 +54,9 @@ class MobileInvoiceManager {
             console.log("✅ Mobile: Initial data loaded + Real-time active");
         });
 
-        // ==================== CUSTOMER SEARCH & SELECTION ====================
+        // ==================== UPGRADED CUSTOMER SEARCH & SELECTION ====================
+        // Touch/click on preview card is now primary (mobile friendly)
+        // Enter key kept as optional backup
         const searchInput = document.getElementById('mobileSearchInput');
         const preview = document.getElementById('selectedCustomerPreview');
         const previewName = document.getElementById('previewName');
@@ -63,31 +65,37 @@ class MobileInvoiceManager {
         const invoiceSection = document.getElementById('customerInvoiceSection');
         const searchSection = document.getElementById('searchSection');
 
-        if (searchInput) {
+        if (searchInput && preview) {
+            // Real-time preview update as user types
             searchInput.addEventListener('input', () => {
+                const mobile = searchInput.value.trim();
+                this.handleMobileSearch(mobile, preview, previewName, previewMobile, previewStreet);
+            });
+
+            // MAIN FEATURE: Touch/click on preview card to confirm selection
+            preview.addEventListener('click', () => {
                 const mobile = searchInput.value.trim();
                 if (mobile.length === 10) {
                     const found = this.customers.find(c => c.mobile === mobile);
                     if (found) {
-                        this.selectedCustomer = found;
-                        previewName.textContent = found.name || 'Unknown';
-                        previewMobile.textContent = found.mobile;
-                        previewStreet.textContent = found.street || 'Not set';
-                        preview.style.display = 'block';
+                        this.selectCustomer(found, searchSection, invoiceSection);
                     } else {
-                        this.selectedCustomer = null;
-                        preview.style.display = 'none';
+                        alert('No customer found with this mobile number!');
                     }
-                } else {
-                    this.selectedCustomer = null;
-                    preview.style.display = 'none';
                 }
             });
 
+            // Optional backup: Enter key also works
             searchInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' && this.selectedCustomer) {
+                if (e.key === 'Enter') {
                     e.preventDefault();
-                    this.selectCustomerFromPreview(); // Reuse same method
+                    const mobile = searchInput.value.trim();
+                    const found = this.customers.find(c => c.mobile === mobile);
+                    if (found) {
+                        this.selectCustomer(found, searchSection, invoiceSection);
+                    } else {
+                        alert('No customer found with this mobile number!');
+                    }
                 }
             });
         }
@@ -139,7 +147,58 @@ class MobileInvoiceManager {
         }
     }
 
-    // NEW METHOD: Called from HTML onclick or Enter key
+    // ==================== NEW HELPER METHODS (added at the end of class) ====================
+
+    // Real-time search preview update
+    handleMobileSearch(mobile, preview, previewName, previewMobile, previewStreet) {
+        if (mobile.length === 10) {
+            const found = this.customers.find(c => c.mobile === mobile);
+            if (found) {
+                this.selectedCustomer = found;
+                previewName.textContent = found.name || 'Unknown';
+                previewMobile.textContent = found.mobile;
+                previewStreet.textContent = found.street || 'Not set';
+                preview.style.display = 'block';
+            } else {
+                this.selectedCustomer = null;
+                preview.style.display = 'none';
+            }
+        } else {
+            this.selectedCustomer = null;
+            preview.style.display = 'none';
+        }
+    }
+
+    // Confirm selection and switch to invoice section
+    selectCustomer(customer, searchSection, invoiceSection) {
+        this.selectedCustomer = customer;
+
+        // Fill the clean display fields in invoice section
+        document.getElementById('displayCustomerName').textContent = customer.name || 'Unknown';
+        document.getElementById('displayMobile').textContent = customer.mobile;
+        document.getElementById('displayStreet').textContent = customer.street || 'Not set';
+
+        // Hide search section completely
+        if (searchSection) {
+            searchSection.style.display = 'none';
+        }
+
+        // Hide preview card
+        document.getElementById('selectedCustomerPreview').style.display = 'none';
+
+        // Show invoice section
+        invoiceSection.style.display = 'block';
+
+        // Optional: Focus first item input for smooth UX
+        setTimeout(() => {
+            const firstInput = document.querySelector('#mobileItemsTableBody input, #mobileItemsTableBody select');
+            if (firstInput) firstInput.focus();
+        }, 200);
+    }
+
+    // ==================== YOUR ORIGINAL METHODS (unchanged) ====================
+
+    // NEW METHOD: Called from HTML onclick or Enter key (kept for compatibility)
     selectCustomerFromPreview() {
         if (!this.selectedCustomer) return;
 
