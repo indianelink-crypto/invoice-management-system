@@ -49,53 +49,63 @@
                 </div>
 
                 <!-- PREMIUM CLEAN INVOICE SECTION -->
-                <div id="customerInvoiceSection" style="display: none; margin-top: 30px; padding: 0 20px;">
+                <div id="customerInvoiceSection" style="display: none; margin-top: 20px; padding: 0 12px;">
 
-                    <!-- NEW: Centered Premium Customer Card (theme-matched + center aligned) -->
-                    <div class="glass customer-card" style="text-align: center; margin: 20px auto; max-width: 90%; padding: 28px 20px; background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.12); border-radius: 24px; box-shadow: 0 10px 35px rgba(0,0,0,0.25);">
-                        <h3 style="margin: 0 0 20px 0; font-size: 1.6em; font-weight: 700; color: #ffd700; letter-spacing: 0.5px;">
+                    <!-- Updated: Rectangle Light Grey Customer Card - Centered + Theme Matched -->
+                    <div class="selected-customer-card" style="margin: 20px auto; max-width: 92%; padding: 24px 16px; background: #f5f5f5; border-radius: 12px; border: 1px solid #e0e0e0; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-align: center;">
+                        <h3 style="margin: 0 0 18px 0; font-size: 1.5em; font-weight: 700; color: #2c3e50; letter-spacing: -0.5px;">
                             Selected Customer
                         </h3>
-                        <div style="font-size: 1.25em; line-height: 1.8; color: white;">
-                            <strong style="color: rgba(255,255,255,0.9); font-weight: 600;">Name:</strong> 
-                            <span id="displayCustomerName" style="font-weight: bold; color: #ffd700;"></span><br>
-                            
-                            <strong style="color: rgba(255,255,255,0.9); font-weight: 600;">Mobile:</strong> 
-                            <span id="displayMobile" style="font-weight: bold; color: #ffd700;"></span><br>
-                            
-                            <strong style="color: rgba(255,255,255,0.9); font-weight: 600;">Street:</strong> 
-                            <span id="displayStreet" style="color: #ffd700;"></span>
+                        <div style="font-size: 1.2em; line-height: 1.7; color: #333333;">
+                            <strong style="color: #4a4a4a; font-weight: 600;">Name:</strong> 
+                            <span id="displayCustomerName" style="font-weight: bold; color: #2c3e50;"></span><br>
+        
+                            <strong style="color: #4a4a4a; font-weight: 600;">Mobile:</strong> 
+                            <span id="displayMobile" style="font-weight: bold; color: #2c3e50;"></span><br>
+        
+                            <strong style="color: #4a4a4a; font-weight: 600;">Street:</strong> 
+                            <span id="displayStreet" style="color: #2c3e50;"></span>
                         </div>
                     </div>
 
-                    <!-- Date & Invoice Number Premium Center -->
-                    <div style="text-align: center; margin-bottom: 40px;">
-                        <div style="margin-bottom: 25px;">
-                            <label style="font-size: 1.3em; color: #2c3e50; font-weight: bold;">Invoice Date</label><br>
-                            <span id="mobileInvoiceDate" style="font-size: 2em; font-weight: bold; color: #2c3e50; background: #f8f9fa; padding: 15px 40px; border-radius: 20px; display: inline-block; box-shadow: 0 8px 20px rgba(0,0,0,0.1);"></span>
+                    <!-- Invoice Date & Number - Moved ABOVE Invoice Items, Clean Centered Layout -->
+                    <div class="invoice-header-group" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; margin: 24px 0; padding: 0 12px;">
+                        <!-- Invoice Date Card -->
+                        <div class="invoice-info-card" style="flex: 1; min-width: 160px; max-width: 220px; text-align: center; background: #ffffff; border-radius: 16px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+                            <label style="font-size: 1em; color: #4a4a4a; font-weight: 500; display: block; margin-bottom: 8px;">Invoice Date</label>
+                            <span id="mobileInvoiceDate" style="font-size: 1.5em; font-weight: bold; color: #2c3e50;"></span>
                         </div>
-                        <div>
-                            <label style="font-size: 1.3em; color: #2c3e50; font-weight: bold;">Invoice Number</label><br>
-                            <span id="mobileInvoiceNumber" style="font-size: 2.2em; font-weight: bold; color: white; background: linear-gradient(135deg, #2c3e50, #34495e); padding: 18px 45px; border-radius: 24px; display: inline-block; box-shadow: 0 10px 30px rgba(0,0,0,0.2);"></span>
+                        
+                        <!-- Invoice Number Card -->
+                        <div class="invoice-info-card" style="flex: 1; min-width: 160px; max-width: 220px; text-align: center; background: #2c3e50; border-radius: 16px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                            <label style="font-size: 1em; color: rgba(255,255,255,0.8); font-weight: 500; display: block; margin-bottom: 8px;">Invoice No</label>
+                            <span id="mobileInvoiceNumber" style="font-size: 1.5em; font-weight: bold; color: white;"></span>
                         </div>
                     </div>
 
-                    <!-- Premium Items Card -->
-                    <div style="background: white; border-radius: 24px; padding: 25px; box-shadow: 0 12px 35px rgba(0,0,0,0.15); margin-bottom: 30px;">
-                        <h3 style="text-align: center; margin-bottom: 30px; color: #2c3e50; font-size: 1.7em;">Invoice Items</h3>
-                        <table class="mobile-items-table" style="width: 100%; border-collapse: separate; border-spacing: 0 12px;">
+                    <!-- Single Invoice Items Section (No duplicate) -->
+                    <div style="background: white; border-radius: 24px; padding: 20px; box-shadow: 0 12px 35px rgba(0,0,0,0.15); margin-bottom: 30px;">
+                        <!-- Only ONE heading -->
+                        <h3 style="text-align: center; margin-bottom: 20px; color: #2c3e50; font-size: 1.6em; font-weight: 700;">
+                            Invoice Items
+                        </h3>
+
+                        <table class="mobile-items-table" style="width: 100%; border-collapse: separate; border-spacing: 0 10px;">
                             <thead>
-                                <tr style="background: linear-gradient(135deg, #2c3e50, #34495e); color: white; border-radius: 16px;">
-                                    <th style="padding: 18px; text-align: left; border-radius: 16px 0 0 16px;">Description</th>
-                                    <th style="padding: 18px;">Qty</th>
-                                    <th style="padding: 18px;">Price (₹)</th>
-                                    <th style="padding: 18px;">Total</th>
-                                    <th style="border-radius: 0 16px 16px 0;"></th>
-                                </tr>
-                            </thead>
+    <tr style="background: #2c3e50 !important; color: white !important; border-radius: 16px;">
+        <th style="padding: 16px; text-align: left; border-radius: 16px 0 0 16px;">Description</th>
+        <th style="padding: 16px;">Qty</th>
+        <th style="padding: 16px;">Price (₹)</th>
+        <th style="padding: 16px;">Total</th>
+        <th style="border-radius: 0 16px 16px 0;"></th>
+    </tr>
+</thead>
                             <tbody id="mobileItemsTableBody" style="background: #f8f9fa;"></tbody>
                         </table>
-                        <button type="button" id="mobileAddItemBtn" class="mobile-add-item-btn" style="margin-top: 25px; width: 100%; padding: 20px; font-size: 1.4em; background: #2c3e50; border-radius: 20px;">+ Add Item</button>
+
+                        <button type="button" id="mobileAddItemBtn" class="mobile-add-item-btn" style="margin-top: 20px; width: 100%; padding: 16px; font-size: 1.3em; background: #2c3e50; border-radius: 18px; color: white;">
+                            + Add Item
+                        </button>
                     </div>
 
                     <!-- Grand Total Premium Highlight -->

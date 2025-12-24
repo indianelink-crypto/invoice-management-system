@@ -841,3 +841,53 @@ body::before {
     color: #ffd700;
     font-weight: 700;
 }
+
+/* Light Grey Rectangle Customer Card - Responsive & Theme Matched */
+.selected-customer-card {
+    background: #f5f5f5;                  /* Light grey fill as requested */
+    border-radius: 12px;                  /* Mild rectangle corners */
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    padding: 24px 16px;
+    margin: 20px auto;
+    max-width: 92%;
+    text-align: center;
+}
+
+.selected-customer-card h3 {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', Roboto, sans-serif;
+    font-size: 1.5em;
+    font-weight: 700;
+    color: #2c3e50;                       /* Your primary dark color */
+    margin-bottom: 18px;
+    letter-spacing: -0.5px;
+}
+
+.selected-customer-card strong {
+    color: #4a4a4a;                       /* Medium grey for labels */
+    font-weight: 600;
+    font-size: 1.1em;
+}
+
+.selected-customer-card span {
+    color: #2c3e50;                       /* Dark text for values */
+    font-weight: 600;
+    font-size: 1.2em;
+}
+
+/* Responsive for small screens */
+@media (max-width: 480px) {
+    .selected-customer-card {
+        padding: 20px 12px;
+        margin: 16px 8px;
+    }
+    
+    .selected-customer-card h3 {
+        font-size: 1.4em;
+    }
+    
+    .selected-customer-card strong,
+    .selected-customer-card span {
+        font-size: 1.1em;
+    }
+}

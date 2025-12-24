@@ -1476,3 +1476,219 @@ section h2 {
 .btn-print-list:hover {
     background: #2c3e50;
 }
+/* Full responsive invoice section after customer select */
+#customerInvoiceSection {
+    padding: 16px 12px;
+    max-width: 100%;
+    overflow-x: hidden; /* No horizontal scroll */
+}
+
+/* Centered customer card - already good, but make it more responsive */
+.customer-card {
+    max-width: 100%;
+    margin: 16px auto;
+    padding: 24px 16px;
+    text-align: center;
+    border-radius: 20px;
+}
+
+/* Items table - Make it fully responsive, no scroll */
+.mobile-items-table {
+    width: 100%;
+    table-layout: fixed;          /* Columns fixed width */
+    border-collapse: separate;
+    border-spacing: 0 10px;
+}
+
+.mobile-items-table th, .mobile-items-table td {
+    padding: 12px 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;          /* Prevent wrapping initially */
+}
+
+/* Allow description to wrap if too long */
+.mobile-items-table td:first-child {
+    white-space: normal;          /* Description can wrap */
+    word-break: break-word;
+}
+
+/* Make sure inputs don't overflow */
+.mobile-item-desc-select,
+.mobile-item-qty,
+.mobile-item-price {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+    font-size: 0.95em;
+}
+
+/* Grand total & buttons section */
+.grand-total,
+.bottom-action {
+    width: 100%;
+    max-width: 400px;             /* Limit max width for large screens */
+    margin: 24px auto;
+    text-align: center;
+}
+
+/* Hide scrollbar but allow scrolling if needed */
+#customerInvoiceSection {
+    -ms-overflow-style: none;     /* IE & Edge */
+    scrollbar-width: none;        /* Firefox */
+}
+
+#customerInvoiceSection::-webkit-scrollbar {
+    display: none;                /* Chrome, Safari */
+}
+
+/* Mobile-first adjustments */
+@media (max-width: 480px) {
+    .mobile-items-table th, .mobile-items-table td {
+        padding: 10px 6px;
+        font-size: 0.9em;
+    }
+    
+    .mobile-item-desc-select,
+    .mobile-item-qty,
+    .mobile-item-price {
+        font-size: 0.9em;
+    }
+}
+/* Invoice Date & Number - Moved above items, clean & responsive */
+.invoice-header-group {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    margin: 24px 0;
+    padding: 0 12px;
+}
+
+.invoice-info-card {
+    flex: 1;
+    min-width: 160px;
+    max-width: 220px;
+    text-align: center;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.invoice-info-card label {
+    font-size: 1em;
+    color: #4a4a4a;
+    font-weight: 500;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.invoice-info-card span {
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+/* Date card - Light background */
+.invoice-info-card:first-child {
+    background: #ffffff;
+    color: #2c3e50;
+}
+
+/* Invoice Number card - Dark background */
+.invoice-info-card:last-child {
+    background: #2c3e50;
+    color: white;
+}
+
+.invoice-info-card:last-child label {
+    color: rgba(255,255,255,0.8);
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .invoice-header-group {
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+    .invoice-info-card {
+        max-width: 100%;
+    }
+}
+/* Fix duplicate heading & enhance table header */
+.mobile-items-table thead tr {
+    background: linear-gradient(135deg, #2c3e50, #34495e) !important;
+}
+
+.mobile-items-table th {
+    color: white !important;
+    font-weight: 700;
+    padding: 16px;
+    text-align: center;
+}
+
+/* Special highlight for Description column */
+.mobile-items-table th:first-child {
+    background: #1a1a1a !important;    /* Darker fill for description header */
+    color: #ffd700 !important;         /* Gold text for premium look */
+    font-weight: 800;
+}
+
+/* Ensure no extra space or duplicate */
+h3 + .mobile-items-table {
+    margin-top: 0 !important;
+}
+/* Better header styling for all columns */
+.mobile-items-table th {
+    background: #2c3e50 !important;        /* Default dark fill */
+    color: white !important;
+    font-weight: 700;
+    text-align: center;
+}
+
+/* Special for Qty, Price, Total - slight variation */
+.mobile-items-table th:nth-child(2),  /* Qty */
+.mobile-items-table th:nth-child(3),  /* Price */
+.mobile-items-table th:nth-child(4) { /* Total */
+    background: #34495e !important;      /* Slightly lighter dark shade */
+}
+
+/* Description special highlight */
+.mobile-items-table th:first-child {
+    background: #1a1a1a !important;
+    color: #ffd700 !important;
+}
+/* Force uniform header color fill for ALL columns */
+.mobile-items-table thead tr {
+    background: #2c3e50 !important;
+}
+
+.mobile-items-table th {
+    background: #2c3e50 !important;     /* ஒரே color எல்லாத்துக்கும் */
+    color: white !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+}
+
+/* Remove any special Description highlight */
+.mobile-items-table th:first-child {
+    background: #2c3e50 !important;     /* Description-க்கும் same */
+    color: white !important;
+}
+/* 100% Uniform Header Color Fill - No exceptions */
+.mobile-items-table thead tr {
+    background: #2c3e50 !important;
+}
+
+.mobile-items-table th {
+    background: #2c3e50 !important;      /* எல்லாத்துக்கும் ஒரே color */
+    color: white !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+}
+
+/* Description-க்கு special highlight remove */
+.mobile-items-table th:first-child {
+    background: #2c3e50 !important;
+    color: white !important;
+}
