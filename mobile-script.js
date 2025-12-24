@@ -1,4 +1,4 @@
-// Mobile Invoice Manager — FULLY UPGRADED + ALL LATEST FIXES
+// Mobile Invoice Manager — FULLY UPGRADED + ALL LATEST FIXES (Top Search Hide)
 
 class MobileInvoiceManager {
     constructor() {
@@ -23,10 +23,9 @@ class MobileInvoiceManager {
         const mm = String(today.getMonth() + 1).padStart(2, '0');
         const yyyy = today.getFullYear();
         const formattedDate = `${dd}-${mm}-${yyyy}`;
-        const dateInput = document.getElementById('mobileInvoiceDate');
-        if (dateInput) {
-            dateInput.textContent = formattedDate; // For span display
-            dateInput.value = formattedDate; // Fallback if input
+        const dateSpan = document.getElementById('mobileInvoiceDate');
+        if (dateSpan) {
+            dateSpan.textContent = formattedDate;
         }
 
         this.updateInvoiceNumber();
@@ -62,6 +61,7 @@ class MobileInvoiceManager {
         const previewMobile = document.getElementById('previewMobile');
         const previewStreet = document.getElementById('previewStreet');
         const invoiceSection = document.getElementById('customerInvoiceSection');
+        const searchSection = document.getElementById('searchSection'); // Top search wrapper
 
         if (searchInput) {
             searchInput.addEventListener('input', () => {
@@ -95,18 +95,19 @@ class MobileInvoiceManager {
 
                     // Show invoice section
                     invoiceSection.style.display = 'block';
-                    
-                    // Clear top search & preview
-                    searchInput.value = '';
+
+                    // HIDE TOP SEARCH SECTION COMPLETELY
+                    if (searchSection) {
+                        searchSection.style.display = 'none';
+                    }
+
+                    // Clear preview
                     preview.style.display = 'none';
-                    searchInput.blur();
 
                     // Focus first item dropdown
                     setTimeout(() => {
                         const firstSelect = document.querySelector('#mobileItemsTableBody .mobile-item-desc-select');
-                        if (firstSelect) {
-                            firstSelect.focus();
-                        }
+                        if (firstSelect) firstSelect.focus();
                     }, 200);
                 }
             });
@@ -226,6 +227,13 @@ class MobileInvoiceManager {
         this.lastInvoice = null;
         this.selectedCustomer = null;
         document.getElementById('customerInvoiceSection').style.display = 'none';
+
+        // SHOW TOP SEARCH SECTION AGAIN
+        const searchSection = document.getElementById('searchSection');
+        if (searchSection) {
+            searchSection.style.display = 'block';
+        }
+
         document.getElementById('mobileSearchInput').value = '';
         document.getElementById('selectedCustomerPreview').style.display = 'none';
 
@@ -648,7 +656,6 @@ class MobileInvoiceManager {
         return JSON.parse(localStorage.getItem('customers')) || [];
     }
 
-    // FIXED: Dynamic datalists for perfect dropdown
     updateMobileNumbersList() {
         const datalist = document.getElementById('mobileMobileNumbersList');
         if (datalist) {

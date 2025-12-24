@@ -31,21 +31,21 @@
         <!-- Invoice Creation Form - CLEAN MAJOR FLOW -->
         <div id="invoiceTab" class="mobile-tab-content active">
             <form id="mobileInvoiceForm" class="mobile-form">
-                <!-- SINGLE BIG SEARCH BAR -->
-                <div class="form-group">
-                    <label for="mobileSearchInput">🔍 Search Customer by Mobile Number</label>
-                    <input type="tel" id="mobileSearchInput" list="mobileMobileNumbersList" required placeholder="Type 10-digit mobile number" autocomplete="off" style="font-size: 1.3em; padding: 20px; border-radius: 18px; border: 2px solid #2c3e50;">
-                    <datalist id="mobileMobileNumbersList"></datalist>
+                <!-- SINGLE SEARCH BAR SECTION - Will hide after selection -->
+<div id="searchSection" class="form-group">
+    <label for="mobileSearchInput">🔍 Search Customer by Mobile Number</label>
+    <input type="tel" id="mobileSearchInput" list="mobileMobileNumbersList" required placeholder="Type 10-digit mobile number" autocomplete="off" style="font-size: 1.3em; padding: 20px; border-radius: 18px; border: 2px solid #2c3e50;">
+    <datalist id="mobileMobileNumbersList"></datalist>
 
-                    <!-- Customer Preview Card (Before Enter) -->
-                    <div id="selectedCustomerPreview" class="customer-preview" style="display: none; margin-top: 20px; padding: 20px; background: rgba(255,255,255,0.95); border-radius: 16px; border: 2px solid #2c3e50; text-align: center; font-size: 1.1em;">
-                        <strong>Selected Customer</strong><br><br>
-                        <strong>Name:</strong> <span id="previewName"></span><br>
-                        <strong>Mobile:</strong> <span id="previewMobile"></span><br>
-                        <strong>Street:</strong> <span id="previewStreet"></span><br><br>
-                        <em style="color: #2c3e50; font-weight: bold;">Press Enter to start billing →</em>
-                    </div>
-                </div>
+    <!-- Preview Card -->
+    <div id="selectedCustomerPreview" class="customer-preview" style="display: none; margin-top: 20px; padding: 20px; background: rgba(255,255,255,0.95); border-radius: 16px; border: 2px solid #2c3e50; text-align: center; font-size: 1.1em;">
+        <strong>Selected Customer</strong><br><br>
+        <strong>Name:</strong> <span id="previewName"></span><br>
+        <strong>Mobile:</strong> <span id="previewMobile"></span><br>
+        <strong>Street:</strong> <span id="previewStreet"></span><br><br>
+        <em style="color: #2c3e50; font-weight: bold;">Press Enter to start billing →</em>
+    </div>
+</div>
 
                 <!-- CLEAN INVOICE SECTION - No duplicate inputs, only display -->
                 <div id="customerInvoiceSection" style="display: none; margin-top: 30px;">
