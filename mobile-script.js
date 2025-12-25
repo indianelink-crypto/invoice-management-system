@@ -84,6 +84,32 @@ class MobileInvoiceManager {
                     }
                 }
             });
+            // ======= NEW: CALL BUTTON FEATURE =======
+const callBtn = document.getElementById('callBtn');
+if (callBtn) {
+    callBtn.addEventListener('click', () => {
+        const mobile = previewMobile.textContent.trim();
+        if (mobile.length === 10) {
+            // Mobile device dialer open pannum
+            window.location.href = `tel:${mobile}`;
+        } else {
+            alert('Customer mobile number not available or invalid');
+        }
+    });
+});
+             // MAIN FEATURE: Touch/click on preview card to confirm selection
+    preview.addEventListener('click', () => {
+        const mobile = searchInput.value.trim();
+        if (mobile.length === 10) {
+            const found = this.customers.find(c => c.mobile === mobile);
+            if (found) {
+                this.selectCustomer(found, searchSection, invoiceSection);
+            } else {
+                alert('No customer found with this mobile number!');
+            }
+        }
+    });
+
 
             // Optional backup: Enter key also works
             searchInput.addEventListener('keydown', (e) => {

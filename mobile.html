@@ -9,6 +9,33 @@
     <link rel="icon" href="data:,">
     <title>Invoice App - Employee</title>
     <link rel="stylesheet" href="mobile-styles.css">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice</title>
+    <link rel="stylesheet" href="mobile-styles.css">
+
+    <!-- 👇 INGATHAAN ADD PANNA -->
+    <style>
+        .action-btn {
+            padding: 6px 16px;
+            font-size: 0.8em;
+            border-radius: 10px;
+            border: none;
+            background: #1abc9c;
+            color: white;
+            font-weight: 600;
+            transition: transform 0.1s ease, background 0.15s ease;
+        }
+
+        .action-btn:active {
+            background: #16a085;
+            transform: scale(0.95);
+        }
+    </style>
+
+</head>
+
 </head>
 <body>
     <div class="mobile-container">
@@ -38,15 +65,55 @@
                     <input type="tel" id="mobileSearchInput" list="mobileMobileNumbersList" required placeholder="Type 10-digit mobile number" autocomplete="off" style="font-size: 1.3em; padding: 20px; border-radius: 18px; border: 2px solid #2c3e50;">
                     <datalist id="mobileMobileNumbersList"></datalist>
 
-                    <!-- Preview Card - NOW CLICKABLE TO SELECT -->
-                    <div id="selectedCustomerPreview" class="customer-preview" style="display: none; margin-top: 20px; padding: 25px; background: linear-gradient(135deg, #2c3e50, #34495e); color: white; border-radius: 20px; text-align: center; font-size: 1.2em; box-shadow: 0 10px 25px rgba(0,0,0,0.2); cursor: pointer;" onclick="window.mobileInvoiceManager.selectCustomerFromPreview()">
-                        <strong style="font-size: 1.4em; color: #ffd700;">Tap to Select Customer</strong><br><br>
-                        <strong>Name:</strong> <span id="previewName" style="font-weight: bold; color: #ffd700;"></span><br>
-                        <strong>Mobile:</strong> <span id="previewMobile" style="font-weight: bold; color: #ffd700;"></span><br>
-                        <strong>Street:</strong> <span id="previewStreet" style="color: #ffd700;"></span><br><br>
-                        <em style="font-size: 1.1em; color: #a0d8ff;">→ Tap this card or press Enter to start billing</em>
-                    </div>
-                </div>
+                    <!-- Preview Card -->
+<!-- Preview Card -->
+<div id="selectedCustomerPreview" class="customer-preview"
+     style="display: none; margin-top: 20px; padding: 25px;
+     background: linear-gradient(135deg, #2c3e50, #34495e);
+     color: white; border-radius: 20px; text-align: center;
+     font-size: 1.2em; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+     cursor: pointer; position: relative;">
+
+    <strong>Name:</strong>
+    <span id="previewName" style="font-weight: bold; color: #ffd700;"></span><br>
+
+    <strong>Mobile:</strong>
+    <span id="previewMobile" style="font-weight: bold; color: #ffd700;"></span><br>
+
+    <strong>Street:</strong>
+    <span id="previewStreet" style="color: #ffd700;"></span><br><br>
+
+    <!-- ACTION BUTTONS -->
+    <div
+        style="
+            position: absolute;
+            bottom: 12px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 18px;
+            box-sizing: border-box;
+        "
+    >
+        <button id="callBtn" type="button" class="action-btn">
+            CALL
+        </button>
+
+        <button id="historyBtn" type="button" class="action-btn">
+            HISTORY
+        </button>
+
+        <button id="billBtn" type="button" class="action-btn">
+            BILL
+        </button>
+    </div>
+
+</div>
+
+
+
 
                 <!-- PREMIUM CLEAN INVOICE SECTION -->
                 <div id="customerInvoiceSection" style="display: none; margin-top: 20px; padding: 0 12px;">
