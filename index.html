@@ -26,6 +26,8 @@
                 <div class="section-tabs">
                     <button class="section-tab active" data-tab="invoice">Create Invoice</button>
                     <button class="section-tab" data-tab="master">Master Entry</button>
+                    <button class="section-tab" data-tab="dashboard">Dashboard</button>
+                    <button class="section-tab" data-tab="reports">Reports</button>
                 </div>
 
                 <!-- Invoice Tab -->
@@ -196,6 +198,46 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Dashboard Tab -->
+                <div id="dashboardTab" class="tab-content">
+                    <h2>Dashboard</h2>
+                    <div class="dashboard-controls">
+                        <button id="dateButton" class="btn btn-primary">Select Date</button>
+                        <input type="date" id="dashboardDate" style="display: none;">
+                    </div>
+                    <div id="employeeButtons" class="employee-buttons">
+                        <!-- Employee buttons will be generated here -->
+                    </div>
+                    <div id="dashboardContent" class="dashboard-content">
+                        <!-- Dashboard content will be shown here -->
+                    </div>
+                </div>
+
+                <!-- Reports Tab -->
+                <div id="reportsTab" class="tab-content">
+                    <h2>Reports</h2>
+                    <div class="reports-controls">
+                        <div class="form-group">
+                            <label for="reportStartDate">Start Date:</label>
+                            <input type="date" id="reportStartDate">
+                        </div>
+                        <div class="form-group">
+                            <label for="reportEndDate">End Date:</label>
+                            <input type="date" id="reportEndDate">
+                        </div>
+                        <div class="form-group">
+                            <label for="reportEmployee">Employee:</label>
+                            <select id="reportEmployee">
+                                <option value="all">All Employees</option>
+                            </select>
+                        </div>
+                        <button id="generateReportBtn" class="btn btn-primary">Generate Report</button>
+                    </div>
+                    <div id="reportsContent" class="reports-content">
+                        <!-- Reports will be displayed here -->
+                    </div>
+                </div>
             </section>
 
             <!-- Invoice List -->
@@ -207,11 +249,21 @@
                     <button class="filter-btn" data-filter="paid">Paid</button>
                 </div>
 
-                <div class="street-filter">
-                    <label for="streetFilter">Filter by Street:</label>
-                    <select id="streetFilter">
-                        <option value="all">All Streets</option>
-                    </select>
+                <div class="filter-controls">
+                    <div class="street-filter">
+                        <label for="streetFilter">Filter by Street:</label>
+                        <select id="streetFilter">
+                            <option value="all">All Streets</option>
+                        </select>
+                    </div>
+                    <div class="date-filter">
+                        <label for="dateFilter">Filter by Date:</label>
+                        <input type="date" id="dateFilter">
+                    </div>
+                    <div class="mobile-filter">
+                        <label for="mobileFilter">Search by Mobile:</label>
+                        <input type="tel" id="mobileFilter" placeholder="Enter mobile number">
+                    </div>
                 </div>
 
                 <div id="invoiceList" class="invoice-list"></div>

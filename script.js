@@ -7,6 +7,7 @@ class InvoiceManagementSystem {
         this.invoices = JSON.parse(localStorage.getItem("invoices")) || [];
         this.items = JSON.parse(localStorage.getItem("items")) || [];
         this.streets = JSON.parse(localStorage.getItem("streets")) || [];
+        this.employees = [];
 
         this.currentStatusFilter = 'all';
 
@@ -17,6 +18,8 @@ class InvoiceManagementSystem {
         this.initTabs();
         this.initMasterForms();
         this.initInvoiceForm();
+        this.initDashboard();
+        this.initReports();
         this.renderCustomers();
         this.renderUsers();
         this.renderItems();
@@ -95,11 +98,12 @@ class InvoiceManagementSystem {
     async loadInvoicesFromDB() {
         const { data, error } = await window.sb
             .from('invoices')
-            .select('*, customers(name, mobile, street)')
+            .select('*, customers(name, mobile, street), created_by_user:auth.users!invoices_created_by_fkey(id, email)')
             .order('created_at', { ascending: false });
         if (error) throw error;
 
         this.invoices = data.map(inv => ({
+            id: inv.id,
             invoiceNumber: inv.invoice_number,
             date: inv.invoice_date,
             customer: inv.customers?.name || '',
@@ -112,7 +116,9 @@ class InvoiceManagementSystem {
                 total: item.total
             })),
             total: inv.total,
-            status: inv.status
+            status: inv.status,
+            createdBy: inv.created_by,
+            createdByEmail: inv.created_by_user?.email || null
         }));
         localStorage.setItem("invoices", JSON.stringify(this.invoices));
     }
@@ -202,12 +208,26 @@ class InvoiceManagementSystem {
             customer = await this.saveCustomerToDB(invoice.customer, invoice.mobile, invoice.street);
         }
 
+        // Get current user ID from session
+        const { data: { session } } = await window.sb.auth.getSession();
+        const userId = session?.user?.id || null;
+
+        // Convert date to YYYY-MM-DD format if needed
+        let invoiceDate = invoice.date;
+        if (invoiceDate && invoiceDate.includes('-')) {
+            const parts = invoiceDate.split('-');
+            if (parts[0].length === 2) {
+                // DD-MM-YYYY format, convert to YYYY-MM-DD
+                invoiceDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+            }
+        }
+
         const { data, error } = await window.sb
             .from('invoices')
             .insert({
                 invoice_number: invoice.invoiceNumber,
                 customer_id: customer.id,
-                invoice_date: invoice.date,
+                invoice_date: invoiceDate,
                 items: invoice.items.map(i => ({
                     description: i.desc,
                     quantity: i.qty,
@@ -215,7 +235,8 @@ class InvoiceManagementSystem {
                     total: i.total
                 })),
                 total: invoice.total,
-                status: invoice.status
+                status: invoice.status,
+                created_by: userId // Track who created the invoice
             })
             .select()
             .single();
@@ -319,7 +340,18 @@ class InvoiceManagementSystem {
                 document.querySelectorAll(".section-tab").forEach(t => t.classList.remove("active"));
                 document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
                 tab.classList.add("active");
-                document.getElementById(tab.dataset.tab + "Tab").classList.add("active");
+                const tabId = tab.dataset.tab + "Tab";
+                const tabContent = document.getElementById(tabId);
+                if (tabContent) {
+                    tabContent.classList.add("active");
+                }
+                
+                // Tab-specific initialization
+                if (tab.dataset.tab === 'dashboard') {
+                    this.initDashboard();
+                } else if (tab.dataset.tab === 'reports') {
+                    this.initReports();
+                }
             });
         });
 
@@ -628,10 +660,16 @@ class InvoiceManagementSystem {
             const dd = String(today.getDate()).padStart(2, '0');
             const mm = String(today.getMonth() + 1).padStart(2, '0');
             const yyyy = today.getFullYear();
-            const formatted = `${dd}-${mm}-${yyyy}`;
-            dateInput.value = formatted;
-            dateInput.type = 'text'; // Hide calendar picker
-            dateInput.readOnly = true;
+            // Store as YYYY-MM-DD for database, display as DD-MM-YYYY
+            const dbDate = `${yyyy}-${mm}-${dd}`;
+            const displayDate = `${dd}-${mm}-${yyyy}`;
+            dateInput.value = dbDate; // Use proper date format for input
+            dateInput.type = 'date'; // Use date input
+            dateInput.readOnly = false;
+            // Set display value if needed
+            if (dateInput.dataset) {
+                dateInput.dataset.displayValue = displayDate;
+            }
         }
 
         this.updateInvoiceNumber();
@@ -744,11 +782,22 @@ class InvoiceManagementSystem {
 
     setupFilters() {
         const streetSelect = document.getElementById('streetFilter');
-        const uniqueStreets = [...new Set(this.invoices.map(inv => inv.street).filter(Boolean))];
+        // Use streets from streets table, not just from invoices
+        const allStreets = [...new Set([...this.streets, ...this.invoices.map(inv => inv.street).filter(Boolean)])].sort();
         streetSelect.innerHTML = `<option value="all">All Streets</option>` + 
-            uniqueStreets.map(s => `<option value="${s}">${s}</option>`).join('');
-        streetSelect.addEventListener('change', () => this.renderInvoices());
+            allStreets.map(s => `<option value="${s}">${s}</option>`).join('');
+        
+        // Remove existing listeners to avoid duplicates
+        const newStreetSelect = streetSelect.cloneNode(true);
+        streetSelect.parentNode.replaceChild(newStreetSelect, streetSelect);
+        document.getElementById('streetFilter').addEventListener('change', () => this.renderInvoices());
 
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            // Remove existing listeners
+            const newBtn = btn.cloneNode(true);
+            btn.parentNode.replaceChild(newBtn, btn);
+        });
+        
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -757,6 +806,18 @@ class InvoiceManagementSystem {
                 this.renderInvoices();
             });
         });
+
+        // Date filter
+        const dateFilter = document.getElementById('dateFilter');
+        if (dateFilter) {
+            dateFilter.addEventListener('change', () => this.renderInvoices());
+        }
+
+        // Mobile filter
+        const mobileFilter = document.getElementById('mobileFilter');
+        if (mobileFilter) {
+            mobileFilter.addEventListener('input', () => this.renderInvoices());
+        }
     }
 
     renderInvoices() {
@@ -769,6 +830,34 @@ class InvoiceManagementSystem {
         const streetValue = document.getElementById('streetFilter')?.value || 'all';
         if (streetValue !== 'all') {
             filtered = filtered.filter(inv => inv.street === streetValue);
+        }
+
+        const dateValue = document.getElementById('dateFilter')?.value;
+        if (dateValue) {
+            // Convert invoice date to YYYY-MM-DD format for comparison
+            filtered = filtered.filter(inv => {
+                if (!inv.date) return false;
+                // Handle DD-MM-YYYY format
+                const dateParts = inv.date.split('-');
+                let invoiceDate;
+                if (dateParts.length === 3) {
+                    if (dateParts[0].length === 4) {
+                        // Already YYYY-MM-DD
+                        invoiceDate = inv.date.split(' ')[0];
+                    } else {
+                        // DD-MM-YYYY convert to YYYY-MM-DD
+                        invoiceDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+                    }
+                } else {
+                    invoiceDate = inv.date.split(' ')[0];
+                }
+                return invoiceDate === dateValue;
+            });
+        }
+
+        const mobileValue = document.getElementById('mobileFilter')?.value?.trim();
+        if (mobileValue) {
+            filtered = filtered.filter(inv => inv.mobile && inv.mobile.includes(mobileValue));
         }
 
         const list = document.getElementById('invoiceList');
@@ -801,6 +890,287 @@ class InvoiceManagementSystem {
         localStorage.setItem("invoices", JSON.stringify(this.invoices));
         localStorage.setItem("items", JSON.stringify(this.items));
         localStorage.setItem("streets", JSON.stringify(this.streets));
+    }
+
+    // ==================== DASHBOARD METHODS ====================
+    async initDashboard() {
+        await this.loadEmployees();
+        this.renderEmployeeButtons();
+        
+        const dateButton = document.getElementById('dateButton');
+        const dashboardDate = document.getElementById('dashboardDate');
+        
+        if (dateButton && dashboardDate) {
+            dateButton.addEventListener('click', () => {
+                dashboardDate.style.display = dashboardDate.style.display === 'none' ? 'block' : 'none';
+                if (dashboardDate.style.display === 'block') {
+                    dashboardDate.focus();
+                }
+            });
+            
+            dashboardDate.addEventListener('change', () => {
+                this.showDateCollection(dashboardDate.value);
+            });
+        }
+    }
+
+    async loadEmployees() {
+        try {
+            // Get all unique users who have created invoices
+            const { data: invoices, error } = await window.sb
+                .from('invoices')
+                .select('created_by, created_by_user:auth.users!invoices_created_by_fkey(id, email)')
+                .not('created_by', 'is', null);
+
+            if (error) throw error;
+
+            // Get unique employees
+            const employeeMap = new Map();
+            invoices.forEach(inv => {
+                if (inv.created_by && inv.created_by_user) {
+                    if (!employeeMap.has(inv.created_by)) {
+                        employeeMap.set(inv.created_by, {
+                            id: inv.created_by,
+                            email: inv.created_by_user.email || 'Unknown'
+                        });
+                    }
+                }
+            });
+
+            this.employees = Array.from(employeeMap.values());
+        } catch (err) {
+            console.error("Failed to load employees:", err);
+            this.employees = [];
+        }
+    }
+
+    renderEmployeeButtons() {
+        const container = document.getElementById('employeeButtons');
+        if (!container) return;
+
+        if (this.employees.length === 0) {
+            container.innerHTML = '<p>No employees found</p>';
+            return;
+        }
+
+        container.innerHTML = this.employees.map(emp => `
+            <button class="employee-btn" data-employee-id="${emp.id}" data-employee-email="${emp.email}">
+                ${emp.email}
+            </button>
+        `).join('');
+
+        // Add event listeners
+        container.querySelectorAll('.employee-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const employeeId = btn.dataset.employeeId;
+                const employeeEmail = btn.dataset.employeeEmail;
+                this.showEmployeeInvoices(employeeId, employeeEmail);
+            });
+        });
+    }
+
+    async showEmployeeInvoices(employeeId, employeeEmail) {
+        const content = document.getElementById('dashboardContent');
+        if (!content) return;
+
+        try {
+            const { data, error } = await window.sb
+                .from('invoices')
+                .select('*, customers(name, mobile, street)')
+                .eq('created_by', employeeId)
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            const invoices = data || [];
+            const generated = invoices.length;
+            const paid = invoices.filter(inv => inv.status === 'paid').length;
+            const unpaid = generated - paid;
+            const totalAmount = invoices.reduce((sum, inv) => sum + (inv.total || 0), 0);
+            const paidAmount = invoices.filter(inv => inv.status === 'paid').reduce((sum, inv) => sum + (inv.total || 0), 0);
+
+            content.innerHTML = `
+                <div class="dashboard-stats">
+                    <h3>Employee: ${employeeEmail}</h3>
+                    <div class="stat-card">
+                        <strong>Generated Invoices:</strong> ${generated}
+                    </div>
+                    <div class="stat-card">
+                        <strong>Paid Invoices:</strong> ${paid}
+                    </div>
+                    <div class="stat-card">
+                        <strong>Unpaid Invoices:</strong> ${unpaid}
+                    </div>
+                    <div class="stat-card">
+                        <strong>Total Amount:</strong> ₹${totalAmount.toFixed(2)}
+                    </div>
+                    <div class="stat-card">
+                        <strong>Paid Amount:</strong> ₹${paidAmount.toFixed(2)}
+                    </div>
+                </div>
+                <div class="employee-invoices-list">
+                    <h4>Invoice Details:</h4>
+                    ${invoices.map(inv => `
+                        <div class="invoice-item">
+                            <strong>${inv.invoice_number}</strong> - 
+                            ${inv.customers?.name || 'Unknown'} - 
+                            ₹${inv.total.toFixed(2)} - 
+                            <span class="status-${inv.status}">${inv.status.toUpperCase()}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        } catch (err) {
+            content.innerHTML = `<p>Error loading employee data: ${err.message}</p>`;
+        }
+    }
+
+    async showDateCollection(date) {
+        const content = document.getElementById('dashboardContent');
+        if (!content) return;
+
+        try {
+            const { data, error } = await window.sb
+                .from('invoices')
+                .select('*, customers(name, mobile, street), created_by_user:auth.users!invoices_created_by_fkey(id, email)')
+                .eq('status', 'paid')
+                .gte('invoice_date', date)
+                .lte('invoice_date', date)
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            const invoices = data || [];
+            const totalCollected = invoices.reduce((sum, inv) => sum + (inv.total || 0), 0);
+
+            // Group by employee
+            const employeeMap = new Map();
+            invoices.forEach(inv => {
+                const empId = inv.created_by || 'unknown';
+                const empEmail = inv.created_by_user?.email || 'Unknown';
+                if (!employeeMap.has(empId)) {
+                    employeeMap.set(empId, { email: empEmail, amount: 0, count: 0 });
+                }
+                const emp = employeeMap.get(empId);
+                emp.amount += inv.total || 0;
+                emp.count += 1;
+            });
+
+            content.innerHTML = `
+                <div class="dashboard-stats">
+                    <h3>Collection for ${date}</h3>
+                    <div class="stat-card">
+                        <strong>Total Collected:</strong> ₹${totalCollected.toFixed(2)}
+                    </div>
+                    <div class="stat-card">
+                        <strong>Total Paid Invoices:</strong> ${invoices.length}
+                    </div>
+                </div>
+                <div class="employee-collection-list">
+                    <h4>Collection by Employee:</h4>
+                    ${Array.from(employeeMap.entries()).map(([empId, emp]) => `
+                        <div class="employee-collection-item">
+                            <strong>${emp.email}</strong> - 
+                            ₹${emp.amount.toFixed(2)} (${emp.count} invoices)
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        } catch (err) {
+            content.innerHTML = `<p>Error loading date collection: ${err.message}</p>`;
+        }
+    }
+
+    // ==================== REPORTS METHODS ====================
+    initReports() {
+        const generateBtn = document.getElementById('generateReportBtn');
+        if (generateBtn) {
+            generateBtn.addEventListener('click', () => this.generateReport());
+        }
+        this.loadReportEmployees();
+    }
+
+    async loadReportEmployees() {
+        try {
+            await this.loadEmployees();
+            const select = document.getElementById('reportEmployee');
+            if (select) {
+                select.innerHTML = '<option value="all">All Employees</option>' +
+                    this.employees.map(emp => 
+                        `<option value="${emp.id}">${emp.email}</option>`
+                    ).join('');
+            }
+        } catch (err) {
+            console.error("Failed to load employees for reports:", err);
+        }
+    }
+
+    async generateReport() {
+        const content = document.getElementById('reportsContent');
+        if (!content) return;
+
+        const startDate = document.getElementById('reportStartDate').value;
+        const endDate = document.getElementById('reportEndDate').value;
+        const employeeId = document.getElementById('reportEmployee').value;
+
+        if (!startDate || !endDate) {
+            alert("Please select start and end dates");
+            return;
+        }
+
+        try {
+            let query = window.sb
+                .from('invoices')
+                .select('*, customers(name, mobile, street), created_by_user:auth.users!invoices_created_by_fkey(id, email)')
+                .gte('invoice_date', startDate)
+                .lte('invoice_date', endDate);
+
+            if (employeeId !== 'all') {
+                query = query.eq('created_by', employeeId);
+            }
+
+            const { data, error } = await query.order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            const invoices = data || [];
+            const totalAmount = invoices.reduce((sum, inv) => sum + (inv.total || 0), 0);
+            const paidAmount = invoices.filter(inv => inv.status === 'paid').reduce((sum, inv) => sum + (inv.total || 0), 0);
+            const unpaidAmount = totalAmount - paidAmount;
+
+            content.innerHTML = `
+                <div class="report-summary">
+                    <h3>Report Summary (${startDate} to ${endDate})</h3>
+                    <div class="stat-card">
+                        <strong>Total Invoices:</strong> ${invoices.length}
+                    </div>
+                    <div class="stat-card">
+                        <strong>Total Amount:</strong> ₹${totalAmount.toFixed(2)}
+                    </div>
+                    <div class="stat-card">
+                        <strong>Paid Amount:</strong> ₹${paidAmount.toFixed(2)}
+                    </div>
+                    <div class="stat-card">
+                        <strong>Unpaid Amount:</strong> ₹${unpaidAmount.toFixed(2)}
+                    </div>
+                </div>
+                <div class="report-details">
+                    <h4>Invoice Details:</h4>
+                    ${invoices.map(inv => `
+                        <div class="report-invoice-item">
+                            <strong>${inv.invoice_number}</strong> - 
+                            ${inv.invoice_date} - 
+                            ${inv.customers?.name || 'Unknown'} - 
+                            ₹${inv.total.toFixed(2)} - 
+                            <span class="status-${inv.status}">${inv.status.toUpperCase()}</span> - 
+                            ${inv.created_by_user?.email || 'Unknown'}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        } catch (err) {
+            content.innerHTML = `<p>Error generating report: ${err.message}</p>`;
+        }
     }
 }
 

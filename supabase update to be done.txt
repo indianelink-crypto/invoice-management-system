@@ -1,0 +1,5 @@
+1.Your Supabase customers table needs these columns:
+latitude (numeric, nullable)
+longitude (numeric, nullable)
+The code handles cases where customers don't have locations set.
+All map functionality is integrated with Supabase and updates in real time when invoice statuses change.
